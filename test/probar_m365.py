@@ -21,6 +21,7 @@ fs[f'{RAIZ}/05_HERRAMIENTA/LEEME.txt'] = b'x'
 filas = []      # registro Excel
 correos = []    # sendMail
 fallar = set()  # direcciones que fallan una vez
+carpetas = set()
 fallos = []
 
 
@@ -58,22 +59,33 @@ def manejar(route):
                                            headers={'Access-Control-Allow-Origin': '*'})
     if ruta.endswith('/me'):
         return j(200, {'displayName': 'Operadora de Prueba', 'mail': 'operadora@creamas.org'})
+    if ruta == '/v1.0/sites/SITE/drives':
+        return j(200, {'value': [{'id': 'OTRA', 'name': 'Documentos', 'webUrl': 'https://x/sites/X/Shared%20Documents'}, {'id': 'DRV', 'name': 'inbox', 'webUrl': 'https://x/sites/X/inbox'}]})
     if ruta.startswith('/v1.0/sites/creamas.sharepoint.com:'):
         return j(200, {'id': 'SITE'})
-    m = re.match(r'/v1\.0/sites/SITE/drive/root:/(.+?):/children$', ruta)
+    m = re.match(r'/v1\.0/drives/DRV/root(?::/(.+?):)?/children$', ruta)
+    if m and req.method == 'POST':
+        cuerpo = json.loads(req.post_data)
+        p = ((m.group(1) + '/') if m.group(1) else '') + cuerpo['name']
+        if p in carpetas or any(k.startswith(p + '/') for k in fs):
+            return j(409, {'error': {'code': 'nameAlreadyExists', 'message': 'ya existe'}})
+        carpetas.add(p)
+        return j(201, {'id': 'F:' + p, 'name': cuerpo['name'], 'folder': {}})
     if m:
         h = hijos(m.group(1))
         return j(200, {'value': h}) if h else j(404, {'error': {'code': 'itemNotFound', 'message': 'no existe'}})
-    m = re.match(r'/v1\.0/sites/SITE/drive/root:/(.+?):/content$', ruta)
+    m = re.match(r'/v1\.0/drives/DRV/root:/(.+?):/content$', ruta)
     if m and req.method == 'PUT':
         p = m.group(1)
         if p in fs and 'conflictBehavior=fail' in u.query:
             return j(409, {'error': {'code': 'nameAlreadyExists', 'message': 'ya existe'}})
         fs[p] = req.post_data_buffer
         return j(201, {'id': 'I:' + p, 'name': p.split('/')[-1]})
-    m = re.match(r'/v1\.0/sites/SITE/drive/root:/(.+)$', ruta)
+    m = re.match(r'/v1\.0/drives/DRV/root:/(.+)$', ruta)
     if m and req.method == 'GET':
         p = m.group(1)
+        if p in carpetas or any(k.startswith(p + '/') for k in fs):
+            return j(200, {'id': 'F:' + p, 'name': p.split('/')[-1], 'folder': {}, 'webUrl': 'https://creamas.sharepoint.com/sites/X/' + p})
         return j(200, {'id': 'I:' + p, 'name': p.split('/')[-1]}) if p in fs else j(404, {'error': {'code': 'itemNotFound', 'message': 'no existe'}})
     if '/workbook/tables/Envios/rows' in ruta:
         if req.method == 'GET':
@@ -110,6 +122,15 @@ with sync_playwright() as p:
     pg.goto('file://' + os.path.join(BASE, 'index.html'))
     pg.wait_for_selector('#btn-salir')
     check('Operadora de Prueba' in pg.inner_text('#sesion'), 'sesión mostrada')
+    # Preparar carpeta: crea la estructura, sube la plantilla cargada y es repetible sin duplicar
+    pg.evaluate("S.plantillas.empresas = new Uint8Array([37,80,68,70])")
+    pg.evaluate("prepararCarpeta()"); pg.wait_for_function("document.querySelector('#enlace-carpeta').textContent.includes('Carpeta')", timeout=30000)
+    existe = lambda r: r in carpetas or any(k.startswith(r + '/') for k in fs)
+    check(all(existe(f'{RAIZ}/' + r) for r in ['01_REPORTES/Niubiz', '01_REPORTES/Manuales', '01_REPORTES/Exclusiones', '03_CONTROL', '04_LOTES', '06_MANUAL']), f'estructura creada ({len(carpetas)} carpetas nuevas)')
+    check(f'{RAIZ}/05_HERRAMIENTA/plantilla_empresas.pdf' in fs, 'plantilla subida a 05_HERRAMIENTA')
+    n = len(carpetas); pg.evaluate("prepararCarpeta()"); pg.wait_for_timeout(1500)
+    check(len(carpetas) == n, 'repetir no crea duplicados')
+    del fs[f'{RAIZ}/05_HERRAMIENTA/plantilla_empresas.pdf']; pg.evaluate("S.plantillas.empresas = null")
     pg.click('#btn-sp')
     pg.wait_for_function("document.querySelectorAll('#tabla-archivos tbody tr').length >= 5", timeout=60000)
     check(pg.evaluate('!!S.plantillas.personas'), 'plantilla leída desde SharePoint')

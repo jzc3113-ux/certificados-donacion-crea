@@ -150,10 +150,14 @@ footer { text-align:center; color:var(--gris); font-size:12px; padding:20px; }
   </div><div class="fila">
     <div class="campo"><label for="cfg-host">SharePoint</label><input id="cfg-host"></div>
     <div class="campo"><label for="cfg-sitio">Sitio</label><input id="cfg-sitio"></div>
+    <div class="campo"><label for="cfg-biblioteca">Biblioteca</label><input id="cfg-biblioteca"></div>
     <div class="campo"><label for="cfg-carpeta">Carpeta</label><input id="cfg-carpeta"></div>
     <div class="campo"><label for="cfg-buzon">Buzón de envío</label><input id="cfg-buzon"></div>
     <div class="campo"><label for="cfg-pausaMs">Pausa entre correos (ms)</label><input id="cfg-pausaMs" type="number" min="2000"></div>
-  </div><button class="sec" id="cfg-guardar">Guardar configuración</button></details></section>
+  </div><button class="sec" id="cfg-guardar">Guardar configuración</button>
+  <button class="sec" id="cfg-preparar">Crear o completar la carpeta en SharePoint</button>
+  <p class="muted small">Crea la carpeta con sus subcarpetas (01_REPORTES … 06_MANUAL) y sube las plantillas cargadas en este navegador. No borra ni reemplaza nada.</p>
+  <p id="enlace-carpeta"></p></details></section>
 <footer>Crea+ · Certificados de donación · uso interno · contiene pdf-lib (MIT) y JSZip (MIT)</footer>
 <div id="avisos"></div>
 <div id="modal" hidden><div class="modal-caja"><header style="background:var(--azul);color:#fff;display:flex;justify-content:space-between;align-items:center"><b>Certificado de muestra</b><button class="sec" id="cerrar-modal" style="background:#fff">Cerrar</button></header><iframe id="visor" title="Vista previa del certificado"></iframe></div></div>

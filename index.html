@@ -150,10 +150,14 @@ footer { text-align:center; color:var(--gris); font-size:12px; padding:20px; }
   </div><div class="fila">
     <div class="campo"><label for="cfg-host">SharePoint</label><input id="cfg-host"></div>
     <div class="campo"><label for="cfg-sitio">Sitio</label><input id="cfg-sitio"></div>
+    <div class="campo"><label for="cfg-biblioteca">Biblioteca</label><input id="cfg-biblioteca"></div>
     <div class="campo"><label for="cfg-carpeta">Carpeta</label><input id="cfg-carpeta"></div>
     <div class="campo"><label for="cfg-buzon">Buzón de envío</label><input id="cfg-buzon"></div>
     <div class="campo"><label for="cfg-pausaMs">Pausa entre correos (ms)</label><input id="cfg-pausaMs" type="number" min="2000"></div>
-  </div><button class="sec" id="cfg-guardar">Guardar configuración</button></details></section>
+  </div><button class="sec" id="cfg-guardar">Guardar configuración</button>
+  <button class="sec" id="cfg-preparar">Crear o completar la carpeta en SharePoint</button>
+  <p class="muted small">Crea la carpeta con sus subcarpetas (01_REPORTES … 06_MANUAL) y sube las plantillas cargadas en este navegador. No borra ni reemplaza nada.</p>
+  <p id="enlace-carpeta"></p></details></section>
 <footer>Crea+ · Certificados de donación · uso interno · contiene pdf-lib (MIT) y JSZip (MIT)</footer>
 <div id="avisos"></div>
 <div id="modal" hidden><div class="modal-caja"><header style="background:var(--azul);color:#fff;display:flex;justify-content:space-between;align-items:center"><b>Certificado de muestra</b><button class="sec" id="cerrar-modal" style="background:#fff">Cerrar</button></header><iframe id="visor" title="Vista previa del certificado"></iframe></div></div>
@@ -955,7 +959,7 @@ window.addEventListener('DOMContentLoaded', iniciar);
 
 const CFG_DEFECTO = {
   clientId: '', tenantId: '',
-  host: 'creamas.sharepoint.com', sitio: '/sites/Recaudacion2026DataLake', carpeta: 'Certificados 2026',
+  host: 'creamas.sharepoint.com', sitio: '/sites/Recaudacion2026DataLake', biblioteca: 'inbox', carpeta: 'Certificados 2026',
   buzon: 'amigos@creamas.org', pausaMs: 2500,
 };
 const RUTAS = {
@@ -967,7 +971,7 @@ const REGISTRO_PLANTILLA_B64 = 'UEsDBBQAAAAIAMiFd11Gx01IlwAAAM0AAAAQAAAAZG9jUHJv
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 
 let S_AYUDA_LOCAL = '';
-const M = { cfg: { ...CFG_DEFECTO }, token: null, yo: null, siteId: null, lotes: [], registro: null, enviando: false };
+const M = { cfg: { ...CFG_DEFECTO }, token: null, yo: null, siteId: null, driveBase: null, lotes: [], registro: null, enviando: false };
 
 function cargarCfg() {
   try { Object.assign(M.cfg, JSON.parse(localStorage.getItem('cd_m365') || '{}')); } catch (e) { /* sin almacenamiento */ }
@@ -1046,12 +1050,20 @@ async function graph(metodo, ruta, cuerpo, tipo = 'application/json', intento = 
   return j;
 }
 const enc = (ruta) => ruta.split('/').map(encodeURIComponent).join('/');
-const rutaDrive = (rel) => `/sites/${M.siteId}/drive/root:/${enc(M.cfg.carpeta + (rel ? '/' + rel : ''))}`;
+const rutaDrive = (rel) => `${M.driveBase}/root:/${enc(M.cfg.carpeta + (rel ? '/' + rel : ''))}`;
 
 async function sitio() {
-  if (M.siteId) return M.siteId;
+  if (M.siteId && M.driveBase) return M.siteId;
   const s = await graph('GET', `/sites/${M.cfg.host}:${M.cfg.sitio}`);
   M.siteId = s.id;
+  let drive;
+  if (M.cfg.biblioteca) {
+    const lista = (await graph('GET', `/sites/${M.siteId}/drives?$select=id,name,webUrl`)).value || [];
+    const b = M.cfg.biblioteca.toLowerCase();
+    drive = lista.find((d) => (d.name || '').toLowerCase() === b || decodeURIComponent(d.webUrl || '').toLowerCase().endsWith('/' + b));
+    if (!drive) throw new Error(`No existe la biblioteca "${M.cfg.biblioteca}" en el sitio. Bibliotecas disponibles: ${lista.map((d) => d.name).join(', ')}`);
+  } else drive = await graph('GET', `/sites/${M.siteId}/drive`);
+  M.driveBase = `/drives/${drive.id}`;
   return M.siteId;
 }
 
@@ -1076,7 +1088,7 @@ async function listarTodo(rel) {
 }
 async function descargar(it) {
   const url = it['@microsoft.graph.downloadUrl'];
-  const r = url ? await fetch(url) : await fetch(GRAPH + `/sites/${M.siteId}/drive/items/${it.id}/content`, { headers: { Authorization: 'Bearer ' + await tokenVigente() } });
+  const r = url ? await fetch(url) : await fetch(GRAPH + `${M.driveBase}/items/${it.id}/content`, { headers: { Authorization: 'Bearer ' + await tokenVigente() } });
   if (!r.ok) throw new Error(`No se pudo descargar ${it.name}`);
   return new Uint8Array(await r.arrayBuffer());
 }
@@ -1094,7 +1106,7 @@ async function abrirRegistro() {
     item = await subir(RUTAS.registro, deb64(REGISTRO_PLANTILLA_B64));
     aviso('Se creó el archivo "Registro certificados 2026.xlsx" en 03_CONTROL.', 'ok');
   }
-  const base = `/sites/${M.siteId}/drive/items/${item.id}/workbook/tables/Envios`;
+  const base = `${M.driveBase}/items/${item.id}/workbook/tables/Envios`;
   const filas = (await graph('GET', `${base}/rows`)).value || [];
   const porNumero = new Map();
   for (const f of filas) {
@@ -1115,6 +1127,35 @@ async function registrar(valores) {
 }
 async function actualizarFila(index, valores) {
   await graph('PATCH', `${M.registro.base}/rows/itemAt(index=${index})`, { values: [REG_COLS.map((c) => valores[c] == null ? '' : String(valores[c]))] });
+}
+
+/* ------------------------------------------------------------ preparar la carpeta (estructura fija) */
+const ESTRUCTURA = ['01_REPORTES', '01_REPORTES/Niubiz', '01_REPORTES/AFRUS', '01_REPORTES/MC_Izipay', '01_REPORTES/Manuales', '01_REPORTES/Exclusiones',
+  '02_BASE_DONANTES', '03_CONTROL', '04_LOTES', '05_HERRAMIENTA', '06_MANUAL'];
+
+async function crearCarpeta(rel) {
+  const partes = (M.cfg.carpeta + (rel ? '/' + rel : '')).split('/');
+  const nombre = partes.pop();
+  const padre = partes.length ? `${M.driveBase}/root:/${enc(partes.join('/'))}:/children` : `${M.driveBase}/root/children`;
+  try { await graph('POST', padre, { name: nombre, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' }); return true; }
+  catch (e) { if (e.status === 409) return false; throw e; }
+}
+
+async function prepararCarpeta() {
+  await sitio();
+  let creadas = 0;
+  if (await crearCarpeta('')) creadas++;
+  for (const r of ESTRUCTURA) if (await crearCarpeta(r)) creadas++;
+  let subidas = 0;
+  for (const t of ['personas', 'empresas']) {
+    if (!S.plantillas[t]) continue;
+    try { await subir(`${RUTAS.herramienta}/plantilla_${t}.pdf`, S.plantillas[t]); subidas++; }
+    catch (e) { if (e.status !== 409) throw e; }
+  }
+  const raiz = await graph('GET', rutaDrive(''));
+  aviso(`Carpeta lista: ${creadas} carpetas nuevas${subidas ? `, ${subidas} plantilla(s) subidas` : ''}.`, 'ok');
+  $('#enlace-carpeta').innerHTML = `Carpeta: <a href="${esc(raiz.webUrl)}" target="_blank" rel="noopener">${esc(M.cfg.carpeta)}</a>`;
+  return raiz.webUrl;
 }
 
 /* ------------------------------------------------------------ actualizar desde SharePoint */
@@ -1308,9 +1349,12 @@ async function iniciarM365() {
   cargarCfg(); pintarCfg();
   $('#cfg-guardar').addEventListener('click', () => {
     for (const k of Object.keys(CFG_DEFECTO)) { const el = $('#cfg-' + k); if (el) M.cfg[k] = k === 'pausaMs' ? Math.max(2000, +el.value || 2500) : el.value.trim(); }
-    guardarCfg(); M.siteId = null; aviso('Configuración guardada.', 'ok');
+    guardarCfg(); M.siteId = null; M.driveBase = null; aviso('Configuración guardada.', 'ok');
   });
   $('#btn-sp').addEventListener('click', actualizarDesdeSharePoint);
+  $('#cfg-preparar').addEventListener('click', async () => {
+    try { await prepararCarpeta(); } catch (e) { aviso('No se pudo preparar la carpeta: ' + e.message, 'error'); }
+  });
   $('#btn-generar-sp').addEventListener('click', async () => {
     $('#btn-generar-sp').disabled = true;
     try { await generarEnSharePoint(); } catch (e) { aviso('Error al guardar en SharePoint: ' + e.message, 'error'); }
