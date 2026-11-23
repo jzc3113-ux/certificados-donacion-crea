@@ -1,0 +1,10 @@
+# NUNCA subir datos de donantes, reportes, registros ni plantillas con firma.
+*.csv
+*.xlsx
+*.xlsm
+*.xls
+*.pdf
+*.zip
+test/datos/
+test/salida/
+!src/registro_plantilla.xlsx
