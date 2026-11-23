@@ -166,6 +166,35 @@ async function actualizarFila(index, valores) {
   await graph('PATCH', `${M.registro.base}/rows/itemAt(index=${index})`, { values: [REG_COLS.map((c) => valores[c] == null ? '' : String(valores[c]))] });
 }
 
+/* ------------------------------------------------------------ preparar la carpeta (estructura fija) */
+const ESTRUCTURA = ['01_REPORTES', '01_REPORTES/Niubiz', '01_REPORTES/AFRUS', '01_REPORTES/MC_Izipay', '01_REPORTES/Manuales', '01_REPORTES/Exclusiones',
+  '02_BASE_DONANTES', '03_CONTROL', '04_LOTES', '05_HERRAMIENTA', '06_MANUAL'];
+
+async function crearCarpeta(rel) {
+  const partes = (M.cfg.carpeta + (rel ? '/' + rel : '')).split('/');
+  const nombre = partes.pop();
+  const padre = partes.length ? `/sites/${M.siteId}/drive/root:/${enc(partes.join('/'))}:/children` : `/sites/${M.siteId}/drive/root/children`;
+  try { await graph('POST', padre, { name: nombre, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' }); return true; }
+  catch (e) { if (e.status === 409) return false; throw e; }
+}
+
+async function prepararCarpeta() {
+  await sitio();
+  let creadas = 0;
+  if (await crearCarpeta('')) creadas++;
+  for (const r of ESTRUCTURA) if (await crearCarpeta(r)) creadas++;
+  let subidas = 0;
+  for (const t of ['personas', 'empresas']) {
+    if (!S.plantillas[t]) continue;
+    try { await subir(`${RUTAS.herramienta}/plantilla_${t}.pdf`, S.plantillas[t]); subidas++; }
+    catch (e) { if (e.status !== 409) throw e; }
+  }
+  const raiz = await graph('GET', rutaDrive(''));
+  aviso(`Carpeta lista: ${creadas} carpetas nuevas${subidas ? `, ${subidas} plantilla(s) subidas` : ''}.`, 'ok');
+  $('#enlace-carpeta').innerHTML = `Carpeta: <a href="${esc(raiz.webUrl)}" target="_blank" rel="noopener">${esc(M.cfg.carpeta)}</a>`;
+  return raiz.webUrl;
+}
+
 /* ------------------------------------------------------------ actualizar desde SharePoint */
 async function actualizarDesdeSharePoint() {
   $('#cargando').hidden = false;
@@ -360,6 +389,9 @@ async function iniciarM365() {
     guardarCfg(); M.siteId = null; aviso('Configuración guardada.', 'ok');
   });
   $('#btn-sp').addEventListener('click', actualizarDesdeSharePoint);
+  $('#cfg-preparar').addEventListener('click', async () => {
+    try { await prepararCarpeta(); } catch (e) { aviso('No se pudo preparar la carpeta: ' + e.message, 'error'); }
+  });
   $('#btn-generar-sp').addEventListener('click', async () => {
     $('#btn-generar-sp').disabled = true;
     try { await generarEnSharePoint(); } catch (e) { aviso('Error al guardar en SharePoint: ' + e.message, 'error'); }
