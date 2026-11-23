@@ -59,9 +59,11 @@ def manejar(route):
                                            headers={'Access-Control-Allow-Origin': '*'})
     if ruta.endswith('/me'):
         return j(200, {'displayName': 'Operadora de Prueba', 'mail': 'operadora@creamas.org'})
+    if ruta == '/v1.0/sites/SITE/drives':
+        return j(200, {'value': [{'id': 'OTRA', 'name': 'Documentos', 'webUrl': 'https://x/sites/X/Shared%20Documents'}, {'id': 'DRV', 'name': 'inbox', 'webUrl': 'https://x/sites/X/inbox'}]})
     if ruta.startswith('/v1.0/sites/creamas.sharepoint.com:'):
         return j(200, {'id': 'SITE'})
-    m = re.match(r'/v1\.0/sites/SITE/drive/root(?::/(.+?):)?/children$', ruta)
+    m = re.match(r'/v1\.0/drives/DRV/root(?::/(.+?):)?/children$', ruta)
     if m and req.method == 'POST':
         cuerpo = json.loads(req.post_data)
         p = ((m.group(1) + '/') if m.group(1) else '') + cuerpo['name']
@@ -72,14 +74,14 @@ def manejar(route):
     if m:
         h = hijos(m.group(1))
         return j(200, {'value': h}) if h else j(404, {'error': {'code': 'itemNotFound', 'message': 'no existe'}})
-    m = re.match(r'/v1\.0/sites/SITE/drive/root:/(.+?):/content$', ruta)
+    m = re.match(r'/v1\.0/drives/DRV/root:/(.+?):/content$', ruta)
     if m and req.method == 'PUT':
         p = m.group(1)
         if p in fs and 'conflictBehavior=fail' in u.query:
             return j(409, {'error': {'code': 'nameAlreadyExists', 'message': 'ya existe'}})
         fs[p] = req.post_data_buffer
         return j(201, {'id': 'I:' + p, 'name': p.split('/')[-1]})
-    m = re.match(r'/v1\.0/sites/SITE/drive/root:/(.+)$', ruta)
+    m = re.match(r'/v1\.0/drives/DRV/root:/(.+)$', ruta)
     if m and req.method == 'GET':
         p = m.group(1)
         if p in carpetas or any(k.startswith(p + '/') for k in fs):

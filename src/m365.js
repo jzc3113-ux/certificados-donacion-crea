@@ -4,7 +4,7 @@
 
 const CFG_DEFECTO = {
   clientId: '', tenantId: '',
-  host: 'creamas.sharepoint.com', sitio: '/sites/Recaudacion2026DataLake', carpeta: 'Certificados 2026',
+  host: 'creamas.sharepoint.com', sitio: '/sites/Recaudacion2026DataLake', biblioteca: 'inbox', carpeta: 'Certificados 2026',
   buzon: 'amigos@creamas.org', pausaMs: 2500,
 };
 const RUTAS = {
@@ -16,7 +16,7 @@ const REGISTRO_PLANTILLA_B64 = '/*__REGISTRO_B64__*/';
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 
 let S_AYUDA_LOCAL = '';
-const M = { cfg: { ...CFG_DEFECTO }, token: null, yo: null, siteId: null, lotes: [], registro: null, enviando: false };
+const M = { cfg: { ...CFG_DEFECTO }, token: null, yo: null, siteId: null, driveBase: null, lotes: [], registro: null, enviando: false };
 
 function cargarCfg() {
   try { Object.assign(M.cfg, JSON.parse(localStorage.getItem('cd_m365') || '{}')); } catch (e) { /* sin almacenamiento */ }
@@ -95,12 +95,20 @@ async function graph(metodo, ruta, cuerpo, tipo = 'application/json', intento = 
   return j;
 }
 const enc = (ruta) => ruta.split('/').map(encodeURIComponent).join('/');
-const rutaDrive = (rel) => `/sites/${M.siteId}/drive/root:/${enc(M.cfg.carpeta + (rel ? '/' + rel : ''))}`;
+const rutaDrive = (rel) => `${M.driveBase}/root:/${enc(M.cfg.carpeta + (rel ? '/' + rel : ''))}`;
 
 async function sitio() {
-  if (M.siteId) return M.siteId;
+  if (M.siteId && M.driveBase) return M.siteId;
   const s = await graph('GET', `/sites/${M.cfg.host}:${M.cfg.sitio}`);
   M.siteId = s.id;
+  let drive;
+  if (M.cfg.biblioteca) {
+    const lista = (await graph('GET', `/sites/${M.siteId}/drives?$select=id,name,webUrl`)).value || [];
+    const b = M.cfg.biblioteca.toLowerCase();
+    drive = lista.find((d) => (d.name || '').toLowerCase() === b || decodeURIComponent(d.webUrl || '').toLowerCase().endsWith('/' + b));
+    if (!drive) throw new Error(`No existe la biblioteca "${M.cfg.biblioteca}" en el sitio. Bibliotecas disponibles: ${lista.map((d) => d.name).join(', ')}`);
+  } else drive = await graph('GET', `/sites/${M.siteId}/drive`);
+  M.driveBase = `/drives/${drive.id}`;
   return M.siteId;
 }
 
@@ -125,7 +133,7 @@ async function listarTodo(rel) {
 }
 async function descargar(it) {
   const url = it['@microsoft.graph.downloadUrl'];
-  const r = url ? await fetch(url) : await fetch(GRAPH + `/sites/${M.siteId}/drive/items/${it.id}/content`, { headers: { Authorization: 'Bearer ' + await tokenVigente() } });
+  const r = url ? await fetch(url) : await fetch(GRAPH + `${M.driveBase}/items/${it.id}/content`, { headers: { Authorization: 'Bearer ' + await tokenVigente() } });
   if (!r.ok) throw new Error(`No se pudo descargar ${it.name}`);
   return new Uint8Array(await r.arrayBuffer());
 }
@@ -143,7 +151,7 @@ async function abrirRegistro() {
     item = await subir(RUTAS.registro, deb64(REGISTRO_PLANTILLA_B64));
     aviso('Se creó el archivo "Registro certificados 2026.xlsx" en 03_CONTROL.', 'ok');
   }
-  const base = `/sites/${M.siteId}/drive/items/${item.id}/workbook/tables/Envios`;
+  const base = `${M.driveBase}/items/${item.id}/workbook/tables/Envios`;
   const filas = (await graph('GET', `${base}/rows`)).value || [];
   const porNumero = new Map();
   for (const f of filas) {
@@ -173,7 +181,7 @@ const ESTRUCTURA = ['01_REPORTES', '01_REPORTES/Niubiz', '01_REPORTES/AFRUS', '0
 async function crearCarpeta(rel) {
   const partes = (M.cfg.carpeta + (rel ? '/' + rel : '')).split('/');
   const nombre = partes.pop();
-  const padre = partes.length ? `/sites/${M.siteId}/drive/root:/${enc(partes.join('/'))}:/children` : `/sites/${M.siteId}/drive/root/children`;
+  const padre = partes.length ? `${M.driveBase}/root:/${enc(partes.join('/'))}:/children` : `${M.driveBase}/root/children`;
   try { await graph('POST', padre, { name: nombre, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' }); return true; }
   catch (e) { if (e.status === 409) return false; throw e; }
 }
@@ -386,7 +394,7 @@ async function iniciarM365() {
   cargarCfg(); pintarCfg();
   $('#cfg-guardar').addEventListener('click', () => {
     for (const k of Object.keys(CFG_DEFECTO)) { const el = $('#cfg-' + k); if (el) M.cfg[k] = k === 'pausaMs' ? Math.max(2000, +el.value || 2500) : el.value.trim(); }
-    guardarCfg(); M.siteId = null; aviso('Configuración guardada.', 'ok');
+    guardarCfg(); M.siteId = null; M.driveBase = null; aviso('Configuración guardada.', 'ok');
   });
   $('#btn-sp').addEventListener('click', actualizarDesdeSharePoint);
   $('#cfg-preparar').addEventListener('click', async () => {
