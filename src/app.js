@@ -542,6 +542,19 @@ function actualizarPaso3() {
   const sig = siguienteNumero();
   const muestras = S.muestrasVistas.size;
   $('#estado-muestras').innerHTML = [0, 1, 2].map((k) => `<span class="punto ${k < muestras ? 'ok' : ''}">${k < muestras ? '✓' : k + 1}</span>`).join('') + `<span class="muted small" style="margin-left:6px">${Math.min(muestras, 3)} de 3 ejemplos vistos</span>`;
+  const ofi = S.oficial && !S.oficial.error ? S.oficial : null;
+  $('#num-auto').hidden = !ofi; $('#num-manual').hidden = !!ofi;
+  if (ofi) {
+    const libre = sig !== null && sig >= ofi.siguiente;
+    $('#confirmo-num').checked = libre;
+    $('#num-auto').className = 'caja ' + (libre ? 'ok' : 'mal');
+    const hora = ofi.leido.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    $('#num-auto').innerHTML = libre
+      ? `✓ <b>Número revisado en el Excel oficial</b> (hoy a las ${hora}): el último usado es el <b>${SERIE}${ofi.max}</b>, así que este número está libre. No tienes que abrir el Excel.`
+      : `✕ <b>Ese número ya está usado en el Excel oficial.</b> El último usado es el ${SERIE}${ofi.max}: usa el <b>${Math.max(ofi.siguiente, S.maxEmitido + 1)}</b> o uno mayor.`;
+  } else {
+    $('#num-manual-motivo').innerHTML = S.oficial && S.oficial.error ? `No se pudo revisar el número automáticamente: ${esc(S.oficial.error)}.` : '';
+  }
   const numOk = $('#confirmo-num').checked;
   const ok = listos > 0 && plantillasOk && sig !== null && muestras >= 3 && numOk && $('#confirmo').checked;
   $('#btn-generar').disabled = !ok;
@@ -640,7 +653,7 @@ async function prepararLote() {
       `1. filas_para_REPORTE.txt: pegar en la hoja REPORTE del libro oficial, columna B de la fila del número ${SERIE}${n}.\r\n` +
       `2. manifiesto_envio.csv: lista para el envío de correos.\r\n3. sustento_pagos.csv: qué pagos respaldan cada certificado.\r\n`,
   };
-  return { listos, n, pdfs, control, nombreLote, manifiesto };
+  return { listos, n, pdfs, control, nombreLote, manifiesto, reporte };
 }
 
 /* Después de generar: bloquear a esos donantes y avanzar la numeración. */

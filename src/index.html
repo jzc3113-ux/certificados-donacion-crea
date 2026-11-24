@@ -268,8 +268,9 @@ details.mas { border-radius:14px; }
       <span style="font-size:20px;font-weight:700;color:var(--gris)">002-000021,</span><input id="p-numero" inputmode="numeric" aria-label="Número del primer certificado">
       <span class="muted" id="rango-numeros"></span>
     </div>
-    <p class="small muted" id="origen-numero">La app propone el número siguiente al último que ella misma emitió.</p>
-    <div class="caja warn" style="margin-bottom:0">
+    <div class="caja ok" id="num-auto" hidden style="margin-bottom:0"></div>
+    <div class="caja warn" id="num-manual" style="margin-bottom:0">
+      <p class="small" id="num-manual-motivo"></p>
       <p><b>Antes de seguir, confírmalo en el Excel oficial.</b> Si alguien emitió certificados desde el Excel (por ejemplo, de empresas), el número pudo avanzar. Abre el Excel, ve a la hoja <b>REPORTE</b> y busca en la <b>columna C</b> el primer número que todavía no tiene nombre.</p>
       <label class="check" style="background:#fff;margin-bottom:0"><input type="checkbox" id="confirmo-num"><span id="texto-confirmo-num">Revisé el Excel oficial y este número está libre.</span></label>
     </div>
@@ -282,12 +283,15 @@ details.mas { border-radius:14px; }
   <div id="progreso" hidden style="margin-top:14px"><progress id="barra" max="100" value="0"></progress><p id="progreso-texto"></p></div>
   <div id="post-crear" class="caja ok" hidden>
     <h3 id="post-crear-titulo">Certificados creados</h3>
-    <p><b>Último paso antes de enviar: anótalos en el Excel oficial</b>, para que nadie más use esos números.</p>
-    <ol>
-      <li>Pulsa <b>Descargar filas para el Excel</b>.</li>
-      <li>Abre el archivo descargado, selecciona todo (Ctrl+E) y copia (Ctrl+C).</li>
-      <li>En el Excel oficial, hoja <b>REPORTE</b>, haz clic en la <b>columna B</b> de la fila del número <b id="post-crear-num"></b> y pega (Ctrl+V).</li>
-    </ol>
+    <p id="post-anotado">Quedaron anotados automáticamente en <b>03_CONTROL / Emitidos certificados 2026.xlsx</b>, con las mismas columnas de la hoja REPORTE. No tienes que hacer nada más en Excel: Contabilidad los copia al Excel oficial. Ya puedes enviarlos.</p>
+    <div id="post-manual" hidden>
+      <p><b>No se pudieron anotar solos.</b> Anótalos tú en el Excel oficial para que nadie más use esos números:</p>
+      <ol>
+        <li>Pulsa <b>Descargar filas para el Excel</b>.</li>
+        <li>Abre el archivo descargado, selecciona todo (Ctrl+E) y copia (Ctrl+C).</li>
+        <li>En el Excel oficial, hoja <b>REPORTE</b>, haz clic en la <b>columna B</b> de la fila del número <b id="post-crear-num"></b> y pega (Ctrl+V).</li>
+      </ol>
+    </div>
     <button class="sec" id="btn-descargar-filas">Descargar filas para el Excel</button>
   </div>
   <div class="acciones">

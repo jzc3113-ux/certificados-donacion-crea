@@ -19,6 +19,21 @@ for f in os.listdir(D):
 fs[f'{RAIZ}/05_HERRAMIENTA/plantilla_personas.pdf'] = open(os.path.join(PLANT, 'plantilla_personas.pdf'), 'rb').read()
 fs[f'{RAIZ}/05_HERRAMIENTA/LEEME.txt'] = b'x'
 filas = []      # registro Excel
+emitidos = [[''] * 36]  # tabla Emitidos (la plantilla trae una fila vacía)
+
+
+def excel_oficial(ultimo):
+    """Libro ficticio con la hoja REPORTE: números ,1 a ,400; usados hasta `ultimo`."""
+    import io
+    import openpyxl
+    wb = openpyxl.Workbook(); ws = wb.active; ws.title = 'REPORTE'
+    ws.append(['N°', 'Tipo de donación', 'Número de certificado', 'Inmobiliaria', 'Señor(es)/Razón Social', 'DNI/RUC'])
+    for n in range(1, 401):
+        ws.append([n, 'Donación PERSONAS' if n <= ultimo else '', f'002-000021,{n}', '', f'Persona {n}' if n <= ultimo else '', f'{40000000 + n}' if n <= ultimo else ''])
+    b = io.BytesIO(); wb.save(b); return b.getvalue()
+
+
+fs['OFICIAL'] = excel_oficial(290)
 correos = []    # sendMail
 fallar = set()  # direcciones que fallan una vez
 carpetas = set()
@@ -87,6 +102,18 @@ def manejar(route):
         if p in carpetas or any(k.startswith(p + '/') for k in fs):
             return j(200, {'id': 'F:' + p, 'name': p.split('/')[-1], 'folder': {}, 'webUrl': 'https://creamas.sharepoint.com/sites/X/' + p})
         return j(200, {'id': 'I:' + p, 'name': p.split('/')[-1]}) if p in fs else j(404, {'error': {'code': 'itemNotFound', 'message': 'no existe'}})
+    if ruta == '/v1.0/drives/OFI/items/XLSM':
+        return j(200, {'id': 'XLSM', 'name': 'SIST. ADMINIS. ficticio.xlsm', 'webUrl': 'https://x/oficial', '@microsoft.graph.downloadUrl': 'https://fake.download/OFICIAL'})
+    if '/workbook/tables/Emitidos/rows' in ruta:
+        if req.method == 'GET':
+            return j(200, {'value': [{'index': i, 'values': [v]} for i, v in enumerate(emitidos)][:2]})
+        if req.method == 'POST':
+            emitidos.extend(json.loads(req.post_data)['values'])
+            return j(201, {'index': len(emitidos) - 1})
+        mi = re.search(r'itemAt\(index=(\d+)\)', ruta)
+        if req.method == 'PATCH' and mi:
+            emitidos[int(mi.group(1))] = json.loads(req.post_data)['values'][0]
+            return j(200, {})
     if '/workbook/tables/Envios/rows' in ruta:
         if req.method == 'GET':
             return j(200, {'value': [{'index': i, 'values': [v]} for i, v in enumerate(filas)]})
@@ -112,7 +139,7 @@ with sync_playwright() as p:
     nav = p.chromium.launch()
     ctx = nav.new_context()
     ctx.add_init_script("""sessionStorage.setItem('cd_token', JSON.stringify({acceso:'FAKE', renovar:'R', vence: Date.now()+3600e3}));
-      localStorage.setItem('cd_m365', JSON.stringify({clientId:'cli', tenantId:'ten', pausaMs: 2000}));""")
+      localStorage.setItem('cd_m365', JSON.stringify({clientId:'cli', tenantId:'ten', pausaMs: 2000, excelOficial: 'OFI|XLSM'}));""")
     ctx.route('https://graph.microsoft.com/**', manejar)
     ctx.route('https://fake.download/**', manejar)
     pg = ctx.new_page()
@@ -141,11 +168,25 @@ with sync_playwright() as p:
     for k in range(3):
         pg.evaluate(f'verMuestra({k})'); pg.wait_for_function("!document.querySelector('#modal').hidden"); pg.click('#cerrar-modal')
     pg.click('#btn-a-paso3')
-    pg.fill('#p-numero', '291'); pg.dispatch_event('#p-numero', 'change'); pg.check('#confirmo'); pg.check('#confirmo-num')
+    check(pg.input_value('#p-numero') == '291' and pg.is_visible('#num-auto') and not pg.is_visible('#num-manual'), f"número leído del Excel oficial: {pg.input_value('#p-numero')}")
+    check(pg.is_checked('#confirmo-num') and '290' in pg.inner_text('#num-auto'), 'número verificado automáticamente (último usado ,290)')
+    check(pg.evaluate("(S.previos.get('40000005') || []).length") == 1, 'certificados previos del Excel oficial quedan como aviso')
+    pg.fill('#p-numero', '280'); pg.dispatch_event('#p-numero', 'input')
+    check(not pg.is_checked('#confirmo-num') and 'ya está usado' in pg.inner_text('#num-auto'), 'un número ya usado en el Excel oficial se rechaza')
+    pg.fill('#p-numero', '291'); pg.dispatch_event('#p-numero', 'input')
+    pg.check('#confirmo')
+    # Mientras tanto alguien emite el ,291 en el Excel oficial: la app debe detenerse y proponer el ,292
+    fs['OFICIAL'] = excel_oficial(291)
+    pg.click('#btn-generar-sp')
+    pg.wait_for_function("document.querySelector('#p-numero').value === '292'", timeout=30000)
+    check(pg.evaluate('M.lotes.length') == 0, 'no se crea nada si el número cambió en el Excel oficial; propone el ,292')
+    pg.check('#confirmo')
     pg.click('#btn-generar-sp')
     pg.wait_for_function('M.lotes.length === 1', timeout=120000)
     pg.wait_for_selector('#post-crear', state='visible')
-    check('291' in pg.inner_text('#post-crear') and pg.is_visible('#btn-a-paso4'), 'tras crear: aviso para anotar en el Excel y botón para ir a enviar')
+    check('292' in pg.inner_text('#post-crear') and pg.is_visible('#post-anotado') and pg.is_visible('#btn-a-paso4'), 'tras crear: anotados en Emitidos y botón para ir a enviar')
+    reales = [e for e in emitidos if e[1]]
+    check(len(reales) == 6 and len(emitidos) == 6 and reales[0][1] == '002-000021,292' and len(reales[0]) == 36 and isinstance(reales[0][8], (int, float)), f'Emitidos: 6 filas (formato REPORTE, sin fila vacía), desde ,292 ({len(emitidos)})')
     with pg.expect_download() as dl:
         pg.click('#btn-descargar-filas')
     check(dl.value.suggested_filename.startswith('filas para el Excel'), 'descarga de filas para el Excel')
@@ -193,7 +234,7 @@ with sync_playwright() as p:
     pg.wait_for_function("document.querySelectorAll('#tabla-archivos tbody tr').length >= 5", timeout=60000)
     pg.click('#btn-revisar')
     check(pg.evaluate("S.donantes.filter(d => d.incluir && d.estado === 'LISTO').length") == 0, 'nueva sesión: nadie queda para reemitir')
-    check(pg.input_value('#p-numero') == '297', f"nueva sesión: siguiente número 297 ({pg.input_value('#p-numero')})")
+    check(pg.input_value('#p-numero') == '298', f"nueva sesión: siguiente número 298 ({pg.input_value('#p-numero')})")
     pg.screenshot(path=os.path.join(BASE, 'test', 'salida', 'pantalla_m365.png'), full_page=True)
     check(not errores, f'sin errores JS {errores}')
     nav.close()
