@@ -6,13 +6,16 @@ const CFG_DEFECTO = {
   clientId: '', tenantId: '',
   host: 'creamas.sharepoint.com', sitio: '/sites/Recaudacion2026DataLake', biblioteca: 'inbox', carpeta: 'Certificados 2026',
   buzon: 'amigos@creamas.org', pausaMs: 2500,
+  // Excel oficial (solo lectura): "driveId|itemId" del libro SIST. ADMINIS. - CERTIFICADOS DE DONACIÓN.
+  excelOficial: 'b!95ZcP-DRmE6LImxkSHfAqEMmwfFGlStMvT-SXYQZ4O1ZcVXILiuVSoMu-50MDoQ7|01GKN26PC5FOMKMI4USJAI7RTM4II7ENJY',
 };
 const RUTAS = {
   reportes: '01_REPORTES', base: '02_BASE_DONANTES', control: '03_CONTROL', lotes: '04_LOTES', herramienta: '05_HERRAMIENTA',
-  registro: '03_CONTROL/Registro certificados 2026.xlsx',
+  registro: '03_CONTROL/Registro certificados 2026.xlsx', emitidos: '03_CONTROL/Emitidos certificados 2026.xlsx',
 };
 const REG_COLS = ['fecha_registro', 'lote', 'numero_certificado', 'documento', 'nombre', 'correo', 'monto_total', 'archivo', 'estado', 'fecha_envio', 'detalle'];
 const REGISTRO_PLANTILLA_B64 = '/*__REGISTRO_B64__*/';
+const EMITIDOS_PLANTILLA_B64 = '/*__EMITIDOS_B64__*/';
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 
 const M = { cfg: { ...CFG_DEFECTO }, token: null, yo: null, siteId: null, driveBase: null, lotes: [], registro: null, enviando: false };
@@ -175,6 +178,55 @@ async function actualizarFila(index, valores) {
   await graph('PATCH', `${M.registro.base}/rows/itemAt(index=${index})`, { values: [REG_COLS.map((c) => valores[c] == null ? '' : String(valores[c]))] });
 }
 
+/* ------------------------------------------------------------ Excel oficial (solo lectura) */
+async function leerExcelOficial() {
+  const [drive, item] = (M.cfg.excelOficial || '').split('|');
+  if (!drive || !item) return null;
+  let meta;
+  try { meta = await graph('GET', `/drives/${drive}/items/${item}`); }
+  catch (e) { throw new Error(e.status === 404 || e.status === 403 ? 'tu cuenta no tiene acceso al Excel oficial de certificados (pide que lo compartan contigo)' : e.message); }
+  const r = await fetch(meta['@microsoft.graph.downloadUrl'] || GRAPH + `/drives/${drive}/items/${item}/content`,
+    meta['@microsoft.graph.downloadUrl'] ? {} : { headers: { Authorization: 'Bearer ' + await tokenVigente() } });
+  if (!r.ok) throw new Error('no se pudo descargar el Excel oficial');
+  const hojas = await leerXLSX(await r.arrayBuffer());
+  const h = hojas.find((x) => sinTildes(x.nombre) === 'reporte');
+  if (!h) throw new Error('el Excel oficial no tiene la hoja REPORTE');
+  const fc = h.filas.findIndex((f) => f.some((c) => sinTildes(c) === 'numero de certificado'));
+  if (fc < 0) throw new Error('no se encontró la columna "Número de certificado" en REPORTE');
+  const cab = h.filas[fc].map(sinTildes);
+  const cNum = cab.indexOf('numero de certificado');
+  const cNom = cab.findIndex((c) => c.startsWith('senor(es)') || c.includes('razon social'));
+  const cDoc = cab.findIndex((c) => c.startsWith('dni'));
+  let max = 0, usados = 0;
+  for (let k = fc + 1; k < h.filas.length; k++) {
+    const f = h.filas[k]; const num = limpiar(f[cNum]);
+    if (!num.startsWith(SERIE) || !limpiar(f[cNom])) continue;
+    usados++;
+    const n = parseInt(num.slice(SERIE.length), 10); if (n > max) max = n;
+    const doc = cDoc >= 0 ? normDoc(f[cDoc]) : '';
+    if (doc && !S.emitidos.has(doc)) { const l = S.previos.get(doc) || []; if (!l.includes(num)) l.push(num); S.previos.set(doc, l); }
+  }
+  return { max, siguiente: max + 1, usados, nombre: meta.name, webUrl: meta.webUrl, leido: new Date() };
+}
+
+/* ------------------------------------------------------------ Emitidos: cada certificado creado queda en un Excel (formato REPORTE) */
+async function anotarEmitidos(L) {
+  let item;
+  try { item = await graph('GET', rutaDrive(RUTAS.emitidos)); }
+  catch (e) { if (e.status !== 404) throw e; item = await subir(RUTAS.emitidos, deb64(EMITIDOS_PLANTILLA_B64)); }
+  const base = `${M.driveBase}/items/${item.id}/workbook/tables/Emitidos`;
+  const marca = new Date().toISOString();
+  const numericas = new Set(); for (let j = 0; j < 8; j++) { numericas.add(7 + j * 3); numericas.add(8 + j * 3); } numericas.add(31);
+  const filas = L.reporte.map((f) => [...f.map((v, i) => (numericas.has(i) && v !== '' && v != null ? Number(v) : v)), L.nombreLote, marca]);
+  let desde = 0;
+  const actuales = (await graph('GET', `${base}/rows?$top=2`)).value || [];
+  if (actuales.length === 1 && actuales[0].values[0].every((v) => v === '' || v == null)) {
+    await graph('PATCH', `${base}/rows/itemAt(index=0)`, { values: [filas[0]] }); desde = 1;
+  }
+  for (let k = desde; k < filas.length; k += 100) await graph('POST', `${base}/rows`, { values: filas.slice(k, k + 100) });
+  return item;
+}
+
 /* ------------------------------------------------------------ preparar la carpeta (estructura fija) */
 const ESTRUCTURA = ['01_REPORTES', '01_REPORTES/Niubiz', '01_REPORTES/AFRUS', '01_REPORTES/MC_Izipay', '01_REPORTES/Manuales', '01_REPORTES/Exclusiones',
   '02_BASE_DONANTES', '03_CONTROL', '04_LOTES', '05_HERRAMIENTA', '06_MANUAL'];
@@ -229,13 +281,15 @@ async function actualizarDesdeSharePoint() {
     }
     await leerLotes();
     await abrirRegistro();
+    try { S.oficial = await leerExcelOficial(); } catch (e) { S.oficial = { error: e.message }; }
     M.leido = true;
   } catch (e) {
     aviso('No se pudo leer la carpeta de SharePoint: ' + e.message + ' Revisa tu conexión y pulsa "Leer la carpeta otra vez".', 'error');
   }
   M.leyendo = false;
   $('#cargando').hidden = true;
-  if (S.maxEmitido && !$('#p-numero').value) $('#p-numero').value = String(S.maxEmitido + 1);
+  const propuesto = Math.max(S.maxEmitido + 1, S.oficial && S.oficial.siguiente ? S.oficial.siguiente : 0);
+  if (propuesto > 1 && (S.oficial && S.oficial.siguiente || !$('#p-numero').value)) $('#p-numero').value = String(propuesto);
   pintarArchivos(); actualizarPaso3(); pintarLotes();
 }
 
@@ -263,6 +317,15 @@ async function leerLotes() {
 /* ------------------------------------------------------------ generar y guardar en SharePoint */
 async function generarEnSharePoint() {
   await sitio();
+  if (S.oficial && !S.oficial.error) {
+    const o = await leerExcelOficial();
+    S.oficial = o;
+    if (siguienteNumero() < o.siguiente) {
+      $('#p-numero').value = String(Math.max(o.siguiente, S.maxEmitido + 1));
+      actualizarPaso3();
+      throw new Error(`Mientras tanto se emitió el N.º ${SERIE}${o.max} en el Excel oficial. Actualicé el número a ${$('#p-numero').value}: revísalo y vuelve a pulsar Crear.`);
+    }
+  }
   const L = await prepararLote();
   const rel = `${RUTAS.lotes}/${L.nombreLote}`;
   $('#progreso-texto').textContent = 'Guardando en SharePoint…';
@@ -274,6 +337,9 @@ async function generarEnSharePoint() {
     $('#progreso-texto').textContent = `Guardando PDF ${k + 1} de ${L.pdfs.length} en SharePoint…`;
   }
   cerrarLote(L);
+  let anotado = true;
+  try { await anotarEmitidos(L); } catch (e) { anotado = false; aviso('Los certificados se crearon, pero no se pudieron anotar en "Emitidos": ' + e.message + ' Usa el botón "Descargar filas".', 'warn'); }
+  $('#post-anotado').hidden = !anotado; $('#post-manual').hidden = anotado;
   await leerLotes();
   if (!M.registro) await abrirRegistro();
   pintarLotes();
