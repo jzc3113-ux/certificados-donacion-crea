@@ -15,7 +15,6 @@ const REG_COLS = ['fecha_registro', 'lote', 'numero_certificado', 'documento', '
 const REGISTRO_PLANTILLA_B64 = '/*__REGISTRO_B64__*/';
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 
-let S_AYUDA_LOCAL = '';
 const M = { cfg: { ...CFG_DEFECTO }, token: null, yo: null, siteId: null, driveBase: null, lotes: [], registro: null, enviando: false };
 
 function cargarCfg() {
@@ -154,16 +153,18 @@ async function abrirRegistro() {
   const base = `${M.driveBase}/items/${item.id}/workbook/tables/Envios`;
   const filas = (await graph('GET', `${base}/rows`)).value || [];
   const porNumero = new Map();
+  const pruebaLotes = new Set();
   for (const f of filas) {
     const v = f.values[0];
     const reg = Object.fromEntries(REG_COLS.map((c, i) => [c, v[i]]));
     if (!reg.numero_certificado) continue;
+    if (reg.estado === 'PRUEBA_ENVIADA') pruebaLotes.add(reg.lote);
     const previo = porNumero.get(reg.numero_certificado);
     // Prevalece el estado más avanzado: ENVIADO > ENVIANDO > ERROR > PRUEBA
-    const rango = { ENVIADO: 4, ENVIANDO: 3, ERROR: 2, PRUEBA_ENVIADA: 1 };
+    const rango = { REENVIADO: 5, ENVIADO: 4, ENVIANDO: 3, ERROR: 2, PRUEBA_ENVIADA: 1 };
     if (!previo || (rango[reg.estado] || 0) >= (rango[previo.estado] || 0)) porNumero.set(reg.numero_certificado, { ...reg, index: f.index });
   }
-  M.registro = { base, porNumero };
+  M.registro = { base, porNumero, pruebaLotes };
   return M.registro;
 }
 async function registrar(valores) {
@@ -205,7 +206,10 @@ async function prepararCarpeta() {
 
 /* ------------------------------------------------------------ actualizar desde SharePoint */
 async function actualizarDesdeSharePoint() {
+  if (M.leyendo) return;
+  M.leyendo = true;
   $('#cargando').hidden = false;
+  $('#estado-general').innerHTML = '';
   try {
     await sitio();
     const grupos = [RUTAS.reportes, RUTAS.base, RUTAS.control, RUTAS.herramienta];
@@ -225,10 +229,11 @@ async function actualizarDesdeSharePoint() {
     }
     await leerLotes();
     await abrirRegistro();
-    aviso(`Se leyeron ${n} archivos desde SharePoint y ${M.lotes.length} lote(s) anteriores.`, 'ok');
+    M.leido = true;
   } catch (e) {
-    aviso('No se pudo leer SharePoint: ' + e.message, 'error');
+    aviso('No se pudo leer la carpeta de SharePoint: ' + e.message + ' Revisa tu conexión y pulsa "Leer la carpeta otra vez".', 'error');
   }
+  M.leyendo = false;
   $('#cargando').hidden = true;
   if (S.maxEmitido && !$('#p-numero').value) $('#p-numero').value = String(S.maxEmitido + 1);
   pintarArchivos(); actualizarPaso3(); pintarLotes();
@@ -272,9 +277,11 @@ async function generarEnSharePoint() {
   await leerLotes();
   if (!M.registro) await abrirRegistro();
   pintarLotes();
-  $('#progreso-texto').textContent = `Listo: ${L.listos.length} certificados guardados en ${M.cfg.carpeta}/${rel}. Ahora puedes enviarlos en el paso 4.`;
-  aviso(`Lote ${L.nombreLote} guardado en SharePoint. Siguiente número: ${SERIE}${L.n + L.listos.length}.`, 'ok');
-  $('#paso4').scrollIntoView({ behavior: 'smooth' });
+  $('#progreso').hidden = true;
+  M.ultimoLote = L;
+  $('#post-crear-titulo').textContent = `Listo: ${L.listos.length.toLocaleString('es-PE')} certificados creados (N.º ${L.n} al ${L.n + L.listos.length - 1})`;
+  $('#post-crear-num').textContent = SERIE + L.n;
+  $('#post-crear').hidden = false;
 }
 
 /* ------------------------------------------------------------ envío */
@@ -283,7 +290,7 @@ function pendientesDe(lote) {
   const pend = [], inciertos = [], enviados = [];
   for (const f of lote.filas) {
     const r = reg.get(f.numero_certificado);
-    if (r && r.estado === 'ENVIADO') enviados.push(f);
+    if (r && (r.estado === 'ENVIADO' || r.estado === 'REENVIADO')) enviados.push(f);
     else if (r && r.estado === 'ENVIANDO') inciertos.push(f);
     else pend.push(f);
   }
@@ -303,17 +310,19 @@ function cuerpoCorreo(f) {
 <p>Con gratitud,<br><b>Equipo Crea+</b></p></div>`;
 }
 
-async function enviarLote(nombreLote) {
+const PRUEBA_MAX = 3;
+async function enviarLote(nombreLote, prueba) {
   if (M.enviando) return;
   const lote = M.lotes.find((l) => l.nombre === nombreLote);
-  const prueba = $('#modo-prueba').checked;
   await abrirRegistro();
-  const { pend, inciertos } = pendientesDe(lote);
-  if (!pend.length) { aviso('Este lote no tiene certificados pendientes de envío.', 'info'); return; }
+  let { pend, inciertos } = pendientesDe(lote);
+  if (!pend.length) { aviso('Ya se enviaron todos los certificados de este grupo.', 'info'); return; }
   const destinoPrueba = M.yo && (M.yo.mail || M.yo.userPrincipalName);
+  if (prueba) pend = pend.slice(0, PRUEBA_MAX);
+  const minutos = Math.max(1, Math.round((pend.length * (M.cfg.pausaMs + 1500)) / 60000));
   const msg = prueba
-    ? `MODO PRUEBA: se enviarán ${pend.length} correos a TU correo (${destinoPrueba}), no a los donantes.`
-    : `Se enviarán ${pend.length} certificados a los donantes desde ${M.cfg.buzon}.\n\nEsto no se puede deshacer. ¿Continuar?`;
+    ? `Se enviarán ${pend.length} correos de PRUEBA a tu correo (${destinoPrueba}). Los donantes no reciben nada.`
+    : `Vas a enviar ${pend.length} certificados a los DONANTES desde ${M.cfg.buzon}.\n\nTardará unos ${minutos} minutos. Una vez enviados, no se pueden recuperar.\n\n¿Enviar ahora?`;
   if (!confirm(msg)) return;
   M.enviando = true;
   const t = { ok: 0, error: 0 };
@@ -350,39 +359,113 @@ async function enviarLote(nombreLote) {
       aviso(`${f.numero_certificado}: no se envió (${e.message}).`, 'error');
     }
     $('#envio-barra').value = Math.round(((k + 1) / pend.length) * 100);
-    $('#envio-texto').textContent = `Enviando ${k + 1} de ${pend.length}… (enviados: ${t.ok}, con error: ${t.error}). No cierres esta pestaña.`;
+    const resta = Math.max(0, Math.round(((pend.length - k - 1) * (M.cfg.pausaMs + 1500)) / 60000));
+    $('#envio-texto').textContent = `Enviando ${k + 1} de ${pend.length}… (enviados: ${t.ok}${t.error ? `, con problema: ${t.error}` : ''}). ${resta ? `Faltan unos ${resta} min. ` : ''}No cierres esta pestaña.`;
     if (k < pend.length - 1) await new Promise((ok) => setTimeout(ok, M.cfg.pausaMs));
   }
   M.enviando = false;
   await abrirRegistro();
   pintarLotes();
-  $('#envio-texto').textContent = `Terminado${prueba ? ' (modo prueba)' : ''}: ${t.ok} enviados, ${t.error} con error${inciertos.length ? `, ${inciertos.length} quedaron en duda de un envío anterior (revisar Elementos enviados)` : ''}.`;
-  aviso(`Envío terminado: ${t.ok} enviados, ${t.error} con error.`, t.error ? 'warn' : 'ok');
+  $('#envio-texto').textContent = prueba
+    ? `Terminado (prueba): se enviaron ${t.ok} correos a ${destinoPrueba}. Revisa tu bandeja: que el PDF se abra y que los datos estén bien.`
+    : `Terminado: ${t.ok} enviados${t.error ? `, ${t.error} con problema (normalmente un correo mal escrito: búscalos abajo en "¿Un donante dice que no le llegó?", corrige el correo y reenvía)` : ''}${inciertos.length ? `. ${inciertos.length} quedaron en duda de un envío anterior: revisa Elementos enviados de ${M.cfg.buzon}` : ''}.`;
+  aviso(prueba ? 'Prueba enviada a tu correo.' : `Envío terminado: ${t.ok} enviados${t.error ? `, ${t.error} con problema` : ''}.`, t.error ? 'warn' : 'ok');
+}
+
+/* ------------------------------------------------------------ reenviar a un donante */
+async function reenviar(nombreLote, numero, correo) {
+  if (M.enviando) return;
+  const lote = M.lotes.find((l) => l.nombre === nombreLote);
+  const f = lote && lote.filas.find((x) => x.numero_certificado === numero);
+  if (!f) throw new Error('No se encontró ese certificado.');
+  correo = limpiar(correo).toLowerCase();
+  if (!correoValido(correo)) { aviso('Ese correo no parece válido. Revísalo.', 'warn'); return; }
+  if (!confirm(`Se reenviará el certificado N.º ${numero} de ${f.nombre} a ${correo}. ¿Continuar?`)) return;
+  M.enviando = true;
+  try {
+    await abrirRegistro();
+    const it = lote.pdfs.get(f.archivo);
+    if (!it) throw new Error('No se encontró el PDF en SharePoint');
+    const bytes = await descargar(it);
+    await graph('POST', `/users/${encodeURIComponent(M.cfg.buzon)}/sendMail`, {
+      message: {
+        subject: `Crea+ | Tu certificado de donación ${(f.periodo_desde || '2026').slice(0, 4)} N.º ${f.numero_certificado}`,
+        body: { contentType: 'HTML', content: cuerpoCorreo(f) },
+        toRecipients: [{ emailAddress: { address: correo } }],
+        attachments: [{ '@odata.type': '#microsoft.graph.fileAttachment', name: f.archivo, contentType: 'application/pdf', contentBytes: b64(bytes) }],
+      },
+      saveToSentItems: true,
+    });
+    await registrar({ fecha_registro: new Date().toISOString(), lote: lote.nombre, numero_certificado: f.numero_certificado, documento: f.documento, nombre: f.nombre, correo, monto_total: f.monto_total, archivo: f.archivo, estado: 'REENVIADO', fecha_envio: new Date().toISOString(), detalle: correo !== f.correo ? 'correo corregido (antes ' + f.correo + ')' : '' });
+    f.correo = correo;
+    await abrirRegistro();
+    aviso(`Certificado reenviado a ${correo}.`, 'ok');
+  } finally { M.enviando = false; }
+  pintarLotes(); pintarReenvio();
+}
+
+function pintarReenvio() {
+  const caja = $('#resultados-reenvio'); if (!caja) return;
+  const q = sinTildes($('#buscar-reenvio').value);
+  if (q.length < 3) { caja.innerHTML = ''; return; }
+  const res = [];
+  for (const l of M.lotes) for (const f of l.filas) if (sinTildes(f.nombre + ' ' + f.documento).includes(q)) res.push({ l, f });
+  if (!res.length) { caja.innerHTML = '<p class="muted">No hay certificados emitidos para esa búsqueda.</p>'; return; }
+  const reg = M.registro ? M.registro.porNumero : new Map();
+  const est = { ENVIADO: 'Enviado', REENVIADO: 'Reenviado', ERROR: 'No se pudo enviar', ENVIANDO: 'En duda', PRUEBA_ENVIADA: 'Sin enviar' };
+  caja.innerHTML = `<table style="margin-top:10px"><thead><tr><th>Nombre</th><th>DNI</th><th>N.º</th><th>Estado</th><th>Correo</th><th></th></tr></thead><tbody>${res.slice(0, 20).map(({ l, f }, k) => {
+    const r = reg.get(f.numero_certificado);
+    return `<tr><td>${esc(f.nombre)}</td><td>${esc(f.documento)}</td><td>${esc(f.numero_certificado.slice(SERIE.length))}</td><td>${esc(r ? est[r.estado] || r.estado : 'Sin enviar')}</td>
+      <td><input class="correo-reenvio" data-k="${k}" value="${esc(f.correo)}"></td><td><button class="sec btn-reenviar" data-k="${k}" data-l="${esc(l.nombre)}" data-n="${esc(f.numero_certificado)}">Reenviar</button></td></tr>`;
+  }).join('')}</tbody></table>`;
 }
 
 /* ------------------------------------------------------------ interfaz */
 function pintarSesion() {
   const dentro = !!M.token;
   $('#sesion').innerHTML = dentro
-    ? `<span>👤 ${esc((M.yo && (M.yo.displayName || M.yo.mail)) || 'Sesión iniciada')}</span> <button class="sec" id="btn-salir" style="background:#fff">Salir</button>`
-    : `<button id="btn-entrar" class="sec" style="background:#fff">Iniciar sesión con Microsoft</button>`;
-  if (dentro) $('#btn-salir').onclick = cerrarSesion; else $('#btn-entrar').onclick = iniciarSesion;
+    ? `<span>👤 ${esc((M.yo && (M.yo.displayName || M.yo.mail)) || 'Sesión iniciada')}</span> <button id="btn-salir">Salir</button>`
+    : '';
+  if (dentro) $('#btn-salir').onclick = cerrarSesion;
   $('#btn-sp').hidden = !dentro;
   $('#btn-generar-sp').hidden = !dentro;
+  $('#btn-generar').hidden = dentro;
   $('#paso4-sp').hidden = !dentro;
   $('#paso4-local').hidden = dentro;
+  $('#buzon-texto').textContent = M.cfg.buzon;
   $('#ayuda-paso1').innerHTML = dentro
-    ? 'Pulsa <b>⟳ Actualizar desde SharePoint</b>: la app lee sola los reportes, la base de donantes, el registro y las plantillas de la carpeta <b>' + esc(M.cfg.carpeta) + '</b>. Si tienes algún archivo extra, también puedes arrastrarlo aquí.'
-    : S_AYUDA_LOCAL;
+    ? 'La app lee sola la carpeta <b>' + esc(M.cfg.carpeta) + '</b> de SharePoint: reportes de pago, base de correos, certificados ya emitidos y plantillas.'
+    : 'Modo sin conexión: arrastra los reportes, la base de donantes y las plantillas en <b>Agregar un archivo</b>.';
+  if (typeof uxSesion === 'function') uxSesion(dentro);
+}
+
+function rangoLote(l) {
+  const m = /^lote_(\d{4})(\d{2})(\d{2})\d{4}_(\d+)-(\d+)$/.exec(l.nombre);
+  return m ? { desde: m[4], hasta: m[5], fecha: `${m[3]}/${m[2]}/${m[1]}` } : { desde: '', hasta: '', fecha: '' };
 }
 
 function pintarLotes() {
   const caja = $('#lista-lotes');
   if (!caja) return;
-  if (!M.lotes.length) { caja.innerHTML = '<p class="muted">Todavía no hay lotes guardados en SharePoint.</p>'; return; }
-  caja.innerHTML = `<table><thead><tr><th>Lote</th><th class="num">Certificados</th><th class="num">Enviados</th><th class="num">Pendientes</th><th class="num">En duda</th><th></th></tr></thead><tbody>${
-    M.lotes.map((l) => { const p = pendientesDe(l); return `<tr><td>${esc(l.nombre)}</td><td class="num">${l.filas.length}</td><td class="num">${p.enviados.length}</td><td class="num">${p.pend.length}</td><td class="num">${p.inciertos.length}</td>
-      <td>${p.pend.length ? `<button class="enviar-lote" data-l="${esc(l.nombre)}">Enviar ${p.pend.length}</button>` : '✅ completo'}</td></tr>`; }).join('')}</tbody></table>`;
+  if (!M.lotes.length) { caja.innerHTML = '<p class="caja info">Todavía no hay certificados creados. Créalos en el paso 3.</p>'; return; }
+  const pruebas = M.registro ? M.registro.pruebaLotes : new Set();
+  const orden = [...M.lotes].sort((a, b) => pendientesDe(b).pend.length - pendientesDe(a).pend.length || b.nombre.localeCompare(a.nombre));
+  caja.innerHTML = orden.map((l) => {
+    const p = pendientesDe(l); const r = rangoLote(l);
+    const probado = pruebas.has(l.nombre) || M.probados.has(l.nombre);
+    const titulo = `<h3>Certificados N.º ${r.desde} al ${r.hasta}</h3><p class="muted small" style="margin:0">${l.filas.length.toLocaleString('es-PE')} certificados · creados el ${r.fecha}</p>`;
+    if (!p.pend.length) {
+      return `<div class="lote">${titulo}<p class="caja ok" style="margin-bottom:0">✓ Todos enviados (${p.enviados.length.toLocaleString('es-PE')}).${p.inciertos.length ? ` ${p.inciertos.length} en duda: revisa Elementos enviados.` : ''}</p></div>`;
+    }
+    return `<div class="lote">${titulo}
+      <p style="margin:10px 0 0"><b>${p.enviados.length.toLocaleString('es-PE')}</b> enviados · <b>${p.pend.length.toLocaleString('es-PE')}</b> por enviar${p.inciertos.length ? ` · <b>${p.inciertos.length}</b> en duda` : ''}</p>
+      <div class="etapas">
+        <div class="etapa ${probado ? 'hecha' : ''}"><h4>${probado ? '✓ ' : ''}a) Envíate una prueba</h4><p>Te llegan ${Math.min(PRUEBA_MAX, p.pend.length)} correos de ejemplo a ti. Revisa que el PDF se abra y que todo esté bien.</p>
+          <button class="sec enviar-prueba" data-l="${esc(l.nombre)}">Enviarme ${Math.min(PRUEBA_MAX, p.pend.length)} de prueba</button></div>
+        <div class="etapa"><h4>b) Envía a los donantes</h4><p>${probado ? 'Cuando hayas revisado la prueba en tu correo.' : 'Se activa después de la prueba.'}</p>
+          <button class="enviar-lote" data-l="${esc(l.nombre)}" ${probado ? '' : 'disabled'}>Enviar a ${p.pend.length.toLocaleString('es-PE')} donantes</button></div>
+      </div></div>`;
+  }).join('');
 }
 
 function pintarCfg() {
@@ -390,30 +473,47 @@ function pintarCfg() {
 }
 
 async function iniciarM365() {
-  S_AYUDA_LOCAL = $('#ayuda-paso1').innerHTML;
+  M.probados = new Set();
   cargarCfg(); pintarCfg();
   $('#cfg-guardar').addEventListener('click', () => {
     for (const k of Object.keys(CFG_DEFECTO)) { const el = $('#cfg-' + k); if (el) M.cfg[k] = k === 'pausaMs' ? Math.max(2000, +el.value || 2500) : el.value.trim(); }
     guardarCfg(); M.siteId = null; M.driveBase = null; aviso('Configuración guardada.', 'ok');
   });
   $('#btn-sp').addEventListener('click', actualizarDesdeSharePoint);
+  $('#btn-entrar-grande').addEventListener('click', iniciarSesion);
   $('#cfg-preparar').addEventListener('click', async () => {
     try { await prepararCarpeta(); } catch (e) { aviso('No se pudo preparar la carpeta: ' + e.message, 'error'); }
   });
   $('#btn-generar-sp').addEventListener('click', async () => {
     $('#btn-generar-sp').disabled = true;
-    try { await generarEnSharePoint(); } catch (e) { aviso('Error al guardar en SharePoint: ' + e.message, 'error'); }
+    try { await generarEnSharePoint(); } catch (e) { aviso('No se pudieron guardar los certificados en SharePoint: ' + e.message, 'error'); }
     actualizarPaso3();
   });
+  $('#btn-descargar-filas').addEventListener('click', () => {
+    const L = M.ultimoLote; if (!L) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([L.control['filas_para_REPORTE.txt']], { type: 'text/plain;charset=utf-8' }));
+    a.download = `filas para el Excel - N ${L.n} al ${L.n + L.listos.length - 1}.txt`;
+    document.body.appendChild(a); a.click(); a.remove();
+  });
   $('#lista-lotes').addEventListener('click', async (e) => {
-    if (!e.target.classList.contains('enviar-lote')) return;
-    e.target.disabled = true;
-    try { await enviarLote(e.target.dataset.l); } catch (err) { M.enviando = false; aviso('Error en el envío: ' + err.message, 'error'); }
+    const b = e.target.closest('.enviar-lote, .enviar-prueba'); if (!b) return;
+    const prueba = b.classList.contains('enviar-prueba');
+    b.disabled = true;
+    try { await enviarLote(b.dataset.l, prueba); if (prueba) M.probados.add(b.dataset.l); } catch (err) { M.enviando = false; aviso('Error en el envío: ' + err.message, 'error'); }
     pintarLotes();
+  });
+  $('#buscar-reenvio').addEventListener('input', pintarReenvio);
+  $('#resultados-reenvio').addEventListener('click', async (e) => {
+    const b = e.target.closest('.btn-reenviar'); if (!b) return;
+    const correo = $(`.correo-reenvio[data-k="${b.dataset.k}"]`).value;
+    b.disabled = true;
+    try { await reenviar(b.dataset.l, b.dataset.n, correo); } catch (err) { M.enviando = false; aviso('No se pudo reenviar: ' + err.message, 'error'); }
+    b.disabled = false;
   });
   window.addEventListener('beforeunload', (e) => { if (M.enviando) { e.preventDefault(); e.returnValue = ''; } });
   try { await completarInicio(); } catch (e) { aviso(e.message, 'error'); }
-  if (M.token) { try { M.yo = await graph('GET', '/me?$select=displayName,mail,userPrincipalName'); } catch (e) { M.token = null; sessionStorage.removeItem('cd_token'); aviso('La sesión venció. Vuelve a iniciar sesión.', 'warn'); } }
+  if (M.token) { try { M.yo = await graph('GET', '/me?$select=displayName,mail,userPrincipalName'); } catch (e) { M.token = null; sessionStorage.removeItem('cd_token'); aviso('La sesión venció. Vuelve a entrar.', 'warn'); } }
   pintarSesion();
 }
 window.addEventListener('DOMContentLoaded', iniciarM365);

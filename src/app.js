@@ -505,9 +505,12 @@ function filtrados() {
 function pintarRevision() {
   const c = { LISTO: 0, REVISAR: 0, EMITIDO: 0 }; let excl = 0, totalListo = 0;
   for (const d of S.donantes) { if (!d.incluir) excl++; else { c[d.estado]++; if (d.estado === 'LISTO') totalListo += d.total; } }
-  $('#contadores').innerHTML = `<span class="chip ok">Listos: ${c.LISTO}</span><span class="chip warn">Para revisar: ${c.REVISAR}</span>
-    <span class="chip">Ya emitidos: ${c.EMITIDO}</span><span class="chip">Excluidos: ${excl}</span><span class="chip">Monto total listo: ${soles(totalListo)}</span>
-    ${S.sinDoc.length ? `<span class="chip warn">Pagos sin DNI: ${S.sinDoc.length}</span>` : ''}`;
+  const f = $('#filtro').value;
+  const tarj = (val, n, txt, cls) => `<button class="metrica ${cls} ${f === val ? 'sel' : ''}" data-f="${val}"><b>${n.toLocaleString('es-PE')}</b><span>${txt}</span></button>`;
+  $('#contadores').innerHTML = tarj('LISTO', c.LISTO, `listos · ${soles(totalListo)}`, 'ok') + tarj('REVISAR', c.REVISAR, 'necesitan tu ayuda', c.REVISAR ? 'warn' : '') +
+    tarj('EMITIDO', c.EMITIDO, 'ya tienen certificado', '') + tarj('EXCLUIDOS', excl, 'dejados fuera', '');
+  $('#ayuda-filtro').hidden = !(f === 'REVISAR' && c.REVISAR);
+  $('#ayuda-filtro').innerHTML = 'A estas personas les falta algo (lo dice la columna <b>Qué falta</b>). Corrígelo en la misma fila (por ejemplo, escribe el correo) y pasarán a <b>Listos</b>. Si no puedes resolverlo, desmarca <b>Incluir</b>: no recibirán certificado por ahora.';
   const lista = filtrados();
   const POR = 50; const pags = Math.max(1, Math.ceil(lista.length / POR));
   S.pagina = Math.min(S.pagina, pags - 1);
@@ -519,13 +522,13 @@ function pintarRevision() {
       : `<input data-i="${i}" class="ed-correo" value="${esc(d.correo)}" placeholder="correo@ejemplo.com">`;
     return `<tr class="${!d.incluir ? 'excluido' : d.estado === 'LISTO' ? 'listo' : 'revisar'}">
       <td><input type="checkbox" data-i="${i}" class="ed-incluir" ${d.incluir ? 'checked' : ''} title="Incluir"></td>
-      <td><span class="estado ${d.estado}">${d.estado === 'LISTO' ? 'Listo' : d.estado === 'EMITIDO' ? 'Ya emitido' : 'Revisar'}</span></td>
+      <td><span class="estado ${d.estado}">${d.estado === 'LISTO' ? 'Listo' : d.estado === 'EMITIDO' ? 'Ya tiene' : 'Falta algo'}</span></td>
       <td><input data-i="${i}" class="ed-nombre" value="${esc(d.nombre)}"></td>
       <td>${esc(d.doc)}</td><td>${correoCampo}</td>
       <td class="num">${d.pagos.length}</td><td class="num">${soles(d.total)}</td>
-      <td class="small">${d.lineas.map((l) => `${l.cantidad} × ${soles(l.valor)}`).join('<br>')}<br><span class="muted">${esc(d.plataformas)}</span></td>
+      <td class="small" style="white-space:nowrap">${d.lineas.map((l) => `${l.cantidad} × ${soles(l.valor)}`).join('<br>')}<br><span class="muted">${esc(d.plataformas)}</span></td>
       <td class="small">${d.tipo === 'empresas' ? `<input data-i="${i}" class="ed-dir" value="${esc(d.direccion)}" placeholder="Dirección de la empresa"><br>` : ''}${d.obs.map(esc).join('<br>')}${d.nota ? `<br><span class="muted">${esc(d.nota)}</span>` : ''}</td>
-      <td><button class="sec ver" data-i="${i}">Ver PDF</button></td></tr>`;
+      <td><button class="sec ver" data-i="${i}" style="padding:5px 10px">Ver PDF</button></td></tr>`;
   }).join('') || '<tr><td colspan="10" class="muted">No hay registros con este filtro.</td></tr>';
   $('#paginas').innerHTML = pags > 1 ? Array.from({ length: pags }, (_, k) => `<button class="pag ${k === S.pagina ? 'act' : ''}" data-p="${k}">${k + 1}</button>`).join('') : '';
   $('#sin-doc').innerHTML = S.sinDoc.length ? `<details><summary>${S.sinDoc.length} pagos exitosos no tienen DNI y no se pudieron asignar a nadie (no se incluyen)</summary>
@@ -538,16 +541,22 @@ function actualizarPaso3() {
   const plantillasOk = S.plantillas.personas && (S.plantillas.empresas || !S.donantes.some((d) => d.incluir && d.estado === 'LISTO' && d.tipo === 'empresas'));
   const sig = siguienteNumero();
   const muestras = S.muestrasVistas.size;
-  $('#estado-plantillas').innerHTML = `<b>Plantillas:</b> personas ${S.plantillas.personas ? '✅ cargada' : '❌ falta'} · empresas ${S.plantillas.empresas ? '✅ cargada' : '— (solo si hay empresas)'}`;
-  $('#caja-plantillas').classList.toggle('falta', !S.plantillas.personas);
-  $('#estado-muestras').textContent = `Certificados de muestra revisados: ${muestras} de 3`;
-  const ok = listos > 0 && plantillasOk && sig !== null && muestras >= 3 && $('#confirmo').checked;
+  $('#estado-muestras').innerHTML = [0, 1, 2].map((k) => `<span class="punto ${k < muestras ? 'ok' : ''}">${k < muestras ? '✓' : k + 1}</span>`).join('') + `<span class="muted small" style="margin-left:6px">${Math.min(muestras, 3)} de 3 ejemplos vistos</span>`;
+  const numOk = $('#confirmo-num').checked;
+  const ok = listos > 0 && plantillasOk && sig !== null && muestras >= 3 && numOk && $('#confirmo').checked;
   $('#btn-generar').disabled = !ok;
-  $('#btn-generar').textContent = listos ? `Generar ${listos} certificados (descargar ZIP)` : 'Generar certificados (descargar ZIP)';
+  $('#btn-generar').textContent = listos ? `Crear ${listos} y descargar ZIP` : 'Crear y descargar ZIP';
   const sp = $('#btn-generar-sp');
-  if (sp) { sp.disabled = !ok; sp.textContent = listos ? `Generar ${listos} certificados y guardarlos en SharePoint` : 'Generar y guardar en SharePoint'; }
-  if (sig !== null && listos) $('#rango-numeros').textContent = `Se usarán los números ${SERIE}${sig} a ${SERIE}${sig + listos - 1}.`;
+  if (sp) { sp.disabled = !ok; sp.textContent = listos ? `Crear ${listos.toLocaleString('es-PE')} certificados` : 'Crear certificados'; }
+  $('#caja-plantillas').hidden = !!plantillasOk;
+  $('#estado-plantillas').innerHTML = `<b>Falta la plantilla de ${S.plantillas.personas ? 'empresas' : 'personas'}.</b> Normalmente se lee sola de la carpeta 05_HERRAMIENTA; si no está ahí, elígela aquí.`;
+  $('#resumen-crear').innerHTML = listos ? `Se crearán <b>${listos.toLocaleString('es-PE')} certificados</b>${sig !== null ? `, del N.º <b>${sig}</b> al <b>${sig + listos - 1}</b>` : ''}.` : 'No hay donantes listos. Vuelve al paso 2.';
+  if (sig !== null && listos) $('#rango-numeros').textContent = `→ hasta el ${SERIE}${sig + listos - 1}`;
   else $('#rango-numeros').textContent = '';
+  $('#texto-confirmo-num').innerHTML = sig !== null ? `Revisé el Excel oficial: el N.º <b>${SERIE}${sig}</b> está libre (no tiene nombre en la hoja REPORTE).` : 'Escribe arriba el número del primer certificado.';
+  const motivo = !listos ? 'No hay donantes listos.' : !plantillasOk ? 'Falta una plantilla.' : sig === null ? 'Falta el número del primer certificado.' : muestras < 3 ? `Faltan ${3 - muestras} ejemplos por mirar (paso 2).` : !numOk ? 'Confirma el número en el Excel.' : !$('#confirmo').checked ? 'Marca la casilla de confirmación.' : '';
+  $('#motivo-3').textContent = motivo;
+  if (typeof uxActualizar === 'function') uxActualizar();
 }
 
 function siguienteNumero() {
@@ -565,8 +574,7 @@ async function plantillaDe(tipo) {
 async function verMuestra(i) {
   const d = S.donantes[i];
   if (!S.plantillas[d.tipo]) {
-    aviso(`Primero carga la plantilla de ${d.tipo} (archivo plantilla_${d.tipo}.pdf) con el botón "Cargar plantillas PDF" del paso 3.`, 'warn');
-    $('#caja-plantillas').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    aviso(`Falta la plantilla de ${d.tipo} (plantilla_${d.tipo}.pdf). Debe estar en la carpeta 05_HERRAMIENTA de SharePoint.`, 'warn');
     return;
   }
   try {
@@ -638,7 +646,7 @@ async function prepararLote() {
 /* Después de generar: bloquear a esos donantes y avanzar la numeración. */
 function cerrarLote(L) {
   L.listos.forEach((d, k) => { d.emitido = SERIE + (L.n + k); S.emitidos.set(d.doc, d.emitido); d.incluir = false; validar(d); });
-  $('#confirmo').checked = false;
+  $('#confirmo').checked = false; $('#confirmo-num').checked = false;
   S.muestrasVistas.clear();
   $('#p-numero').value = String(L.n + L.listos.length);
   guardarAjustes();
@@ -659,6 +667,7 @@ async function generar() {
   document.body.appendChild(a); a.click(); a.remove();
   $('#progreso-texto').textContent = `Listo: ${L.listos.length} certificados generados. Se descargó el archivo ${a.download}.`;
   cerrarLote(L);
+  irA(4);
   aviso(`Se generaron ${L.listos.length} certificados. El siguiente número disponible ahora es ${SERIE}${L.n + L.listos.length}.`, 'ok');
 }
 
@@ -701,11 +710,10 @@ async function iniciar() {
         if (/\.pdf$/i.test(f.name)) {
           const tipo = /empresa/i.test(f.name) ? 'empresas' : 'personas';
           await cargarPlantilla(f, tipo);
-          aviso(`Plantilla de ${tipo} cargada (${f.name}).`, 'ok');
           continue;
         }
         const info = await cargarArchivo(f);
-        aviso(`${f.name}: ${info.tipoTexto}${info.tipo === 'DESCONOCIDO' ? ' — no se usó' : ''}.`, info.tipo === 'DESCONOCIDO' ? 'error' : 'ok');
+        if (info.tipo === 'DESCONOCIDO') aviso(`${f.name}: no se reconoció este archivo y no se usa.`, 'error');
       } catch (e) { aviso(`${f.name}: no se pudo leer (${e.message}).`, 'error'); }
     }
     $('#cargando').hidden = true;
@@ -718,12 +726,13 @@ async function iniciar() {
   $('#input-archivos').addEventListener('change', (e) => { recibir([...e.target.files]); e.target.value = ''; });
 
   $('#btn-revisar').addEventListener('click', () => {
-    const { fueraPeriodo } = consolidar();
-    $('#paso2').hidden = false; $('#paso3').hidden = false;
+    consolidar();
+    $('#filtro').value = S.donantes.some((d) => d.incluir && d.estado === 'REVISAR') ? 'REVISAR' : 'LISTO';
+    S.pagina = 0;
     pintarRevision();
-    aviso(`Revisión lista: ${S.donantes.length} donantes con pagos exitosos en el período. Pagos fuera del período: ${fueraPeriodo}.`, 'ok');
-    $('#paso2').scrollIntoView({ behavior: 'smooth' });
+    irA(2);
   });
+  $('#contadores').addEventListener('click', (e) => { const b = e.target.closest('[data-f]'); if (b) { $('#filtro').value = b.dataset.f; S.pagina = 0; pintarRevision(); } });
   $('#btn-reiniciar').addEventListener('click', () => { if (confirm('¿Borrar todos los archivos cargados y empezar de nuevo? (las plantillas y ajustes se conservan)')) location.reload(); });
   for (const id of ['filtro', 'buscar']) $('#' + id).addEventListener('input', () => { S.pagina = 0; pintarRevision(); });
   $('#paginas').addEventListener('click', (e) => { if (e.target.dataset.p) { S.pagina = +e.target.dataset.p; pintarRevision(); } });
@@ -743,6 +752,8 @@ async function iniciar() {
     if (S.donantes.length && ['p-desde', 'p-hasta'].includes(id)) { consolidar(); pintarRevision(); } else actualizarPaso3();
   });
   $('#confirmo').addEventListener('change', actualizarPaso3);
+  $('#confirmo-num').addEventListener('change', actualizarPaso3);
+  $('#p-numero').addEventListener('input', () => { $('#confirmo-num').checked = false; actualizarPaso3(); });
   $('#input-plantillas').addEventListener('change', async (e) => {
     for (const f of e.target.files) {
       try {

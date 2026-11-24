@@ -140,21 +140,31 @@ with sync_playwright() as p:
     pg.select_option(f'select.ed-correo-sel[data-i="{i}"]', 'gustavo7@ficticio.pe')
     for k in range(3):
         pg.evaluate(f'verMuestra({k})'); pg.wait_for_function("!document.querySelector('#modal').hidden"); pg.click('#cerrar-modal')
-    pg.fill('#p-numero', '291'); pg.dispatch_event('#p-numero', 'change'); pg.check('#confirmo')
+    pg.click('#btn-a-paso3')
+    pg.fill('#p-numero', '291'); pg.dispatch_event('#p-numero', 'change'); pg.check('#confirmo'); pg.check('#confirmo-num')
     pg.click('#btn-generar-sp')
     pg.wait_for_function('M.lotes.length === 1', timeout=120000)
+    pg.wait_for_selector('#post-crear', state='visible')
+    check('291' in pg.inner_text('#post-crear') and pg.is_visible('#btn-a-paso4'), 'tras crear: aviso para anotar en el Excel y botón para ir a enviar')
+    with pg.expect_download() as dl:
+        pg.click('#btn-descargar-filas')
+    check(dl.value.suggested_filename.startswith('filas para el Excel'), 'descarga de filas para el Excel')
+    pg.screenshot(path=os.path.join(BASE, 'test', 'salida', 'm365_paso3.png'), full_page=True)
+    pg.click('#btn-a-paso4')
     lote = [k for k in fs if '/04_LOTES/' in k]
     check(sum(1 for k in lote if k.endswith('.pdf')) == 6 and any(k.endswith('manifiesto_envio.csv') for k in lote), f'lote guardado en SharePoint ({len(lote)} archivos)')
     check(f'{RAIZ}/03_CONTROL/Registro certificados 2026.xlsx' in fs, 'registro Excel creado en 03_CONTROL')
     # 1) modo prueba
     pg.evaluate('M.cfg.pausaMs = 5')
-    pg.click('.enviar-lote')
+    check(pg.is_disabled('.enviar-lote'), 'envío real bloqueado hasta hacer la prueba')
+    pg.click('.enviar-prueba')
     pg.wait_for_function("document.querySelector('#envio-texto').textContent.startsWith('Terminado')", timeout=60000)
-    check(len(correos) == 6 and all(c['para'] == 'operadora@creamas.org' and c['asunto'].startswith('[PRUEBA]') for c in correos), 'modo prueba: 6 correos solo a la operadora')
+    check(len(correos) == 3 and all(c['para'] == 'operadora@creamas.org' and c['asunto'].startswith('[PRUEBA]') for c in correos), f'prueba: 3 correos solo a la operadora ({len(correos)})')
+    check(not pg.is_disabled('.enviar-lote'), 'tras la prueba se habilita el envío real')
+    pg.screenshot(path=os.path.join(BASE, 'test', 'salida', 'm365_paso4.png'), full_page=True)
     check(pg.evaluate("pendientesDe(M.lotes[0]).pend.length") == 6, 'tras la prueba, siguen 6 pendientes reales')
     # 2) envío real con un fallo simulado
     correos.clear(); fallar.add('diego4@ficticio.pe')
-    pg.uncheck('#modo-prueba')
     pg.evaluate("document.querySelector('#envio-texto').textContent=''")
     pg.click('.enviar-lote')
     pg.wait_for_function("document.querySelector('#envio-texto').textContent.startsWith('Terminado')", timeout=60000)
@@ -168,11 +178,18 @@ with sync_playwright() as p:
     para = [c['para'] for c in correos]
     check(len(correos) == 6 and len(set(para)) == 6 and 'diego4@ficticio.pe' in para, 'reanudar envía solo el que faltaba; 6 donantes, sin duplicados')
     estados = [f[8] for f in filas if f[2]]
-    check(estados.count('ENVIADO') == 6 and estados.count('PRUEBA_ENVIADA') == 6, f'registro: 6 ENVIADO y 6 PRUEBA ({estados.count("ENVIADO")}, {estados.count("PRUEBA_ENVIADA")})')
-    check(pg.evaluate("pendientesDe(M.lotes[0]).pend.length") == 0 and 'completo' in pg.inner_text('#lista-lotes'), 'lote completo')
+    check(estados.count('ENVIADO') == 6 and estados.count('PRUEBA_ENVIADA') == 3, f'registro: 6 ENVIADO y 3 PRUEBA ({estados.count("ENVIADO")}, {estados.count("PRUEBA_ENVIADA")})')
+    check(pg.evaluate("pendientesDe(M.lotes[0]).pend.length") == 0 and 'Todos enviados' in pg.inner_text('#lista-lotes'), 'lote completo')
+    # 3b) reenviar a un donante con correo corregido
+    correos.clear()
+    pg.fill('#buscar-reenvio', '7777777')
+    pg.wait_for_selector('.btn-reenviar')
+    pg.fill('.correo-reenvio', 'nuevo7@ficticio.pe'); pg.click('.btn-reenviar')
+    pg.wait_for_function("!M.enviando && document.querySelector('#resultados-reenvio').innerText.includes('Reenviado')", timeout=30000)
+    check(len(correos) == 1 and correos[0]['para'] == 'nuevo7@ficticio.pe', 'reenvío a un donante con correo corregido')
+    check([f[8] for f in filas if f[2]].count('REENVIADO') == 1 and pg.evaluate("pendientesDe(M.lotes[0]).pend.length") == 0, 'reenvío anotado en el registro; nada queda pendiente')
     # 4) nueva sesión: los mismos donantes quedan bloqueados y el número sigue
     pg.reload(); pg.wait_for_selector('#btn-salir')
-    pg.click('#btn-sp')
     pg.wait_for_function("document.querySelectorAll('#tabla-archivos tbody tr').length >= 5", timeout=60000)
     pg.click('#btn-revisar')
     check(pg.evaluate("S.donantes.filter(d => d.incluir && d.estado === 'LISTO').length") == 0, 'nueva sesión: nadie queda para reemitir')

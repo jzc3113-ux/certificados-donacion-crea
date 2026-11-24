@@ -5,79 +5,153 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Certificados de donación · Crea+</title>
 <style>
-:root { --azul:#1a1ab8; --azul2:#eef0ff; --verde:#0f7b3f; --verde2:#e7f6ec; --ambar:#9a5b00; --ambar2:#fff4df; --rojo:#b42318; --rojo2:#fdecea; --gris:#5f6470; --borde:#d9dce3; }
+:root { --azul:#1a1ab8; --azul-osc:#12127f; --azul2:#eef0ff; --verde:#0f7b3f; --verde2:#e7f6ec; --ambar:#8a5200; --ambar2:#fff4df; --rojo:#b42318; --rojo2:#fdecea; --gris:#5f6470; --gris2:#f1f2f7; --borde:#e1e4ec; --texto:#1d2030; }
 * { box-sizing:border-box; }
-body { margin:0; font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:#1d2030; background:#f6f7fb; }
-header { background:var(--azul); color:#fff; padding:18px 28px; display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
-header h1 { margin:0; font-size:22px; } header p { margin:2px 0 0; opacity:.85; font-size:13px; }
-.privado { background:rgba(255,255,255,.14); border-radius:10px; padding:8px 12px; font-size:13px; max-width:360px; }
-main { max-width:1280px; margin:0 auto; padding:22px; }
-.paso { background:#fff; border:1px solid var(--borde); border-radius:14px; padding:20px 22px; margin-bottom:18px; }
-.paso h2 { margin:0 0 4px; font-size:19px; display:flex; align-items:center; gap:10px; }
-.n { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; background:var(--azul); color:#fff; font-size:15px; flex:none; }
-.ayuda { color:var(--gris); margin:0 0 14px; }
-#zona { display:block; border:2.5px dashed #9aa3c7; border-radius:14px; padding:34px; text-align:center; background:var(--azul2); cursor:pointer; }
-#zona.sobre { background:#dfe3ff; border-color:var(--azul); }
-#zona strong { font-size:18px; display:block; margin-bottom:6px; }
-button { font:inherit; border:0; border-radius:10px; padding:12px 20px; background:var(--azul); color:#fff; cursor:pointer; font-weight:600; }
-button:disabled { background:#b9bdd0; cursor:not-allowed; }
-button.sec { background:#fff; color:var(--azul); border:1.5px solid var(--azul); padding:6px 12px; font-weight:600; }
-button.grande { font-size:17px; padding:14px 26px; }
+body { margin:0; font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:var(--texto); background:#f6f7fb; }
+[hidden] { display:none !important; }
+header.barra { background:var(--azul); color:#fff; padding:14px 28px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+.marca { display:flex; align-items:center; gap:12px; }
+.logo { width:38px; height:38px; border-radius:10px; background:#fff; color:var(--azul); display:grid; place-items:center; font-weight:800; font-size:17px; }
+.marca h1 { margin:0; font-size:19px; font-weight:700; } .marca p { margin:0; font-size:13px; opacity:.8; }
+#sesion { display:flex; align-items:center; gap:10px; font-size:14px; }
+#sesion button { background:#fff; color:var(--azul); border:0; padding:8px 14px; }
+main { max-width:1100px; margin:0 auto; padding:24px 20px 40px; }
+nav#pasos { display:flex; gap:8px; margin:0 0 20px; }
+.pbtn { flex:1; display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--borde); border-radius:12px; padding:12px 14px; font:inherit; color:var(--gris); text-align:left; cursor:default; }
+.pbtn .n { flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:var(--gris2); color:var(--gris); font-weight:700; font-size:14px; }
+.pbtn b { display:block; font-size:14.5px; font-weight:600; } .pbtn small { font-size:12.5px; }
+.pbtn.actual { border:2px solid var(--azul); color:var(--texto); } .pbtn.actual .n { background:var(--azul); color:#fff; }
+.pbtn.hecho { cursor:pointer; color:var(--texto); } .pbtn.hecho .n { background:var(--verde2); color:var(--verde); }
+.pbtn.hecho:hover { border-color:var(--azul); }
+.paso, .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:16px; padding:26px 28px; margin-bottom:18px; }
+.paso h2 { margin:0 0 4px; font-size:23px; font-weight:700; }
+.sub { color:var(--gris); margin:0 0 20px; font-size:16px; }
+h3 { font-size:17px; margin:0 0 8px; }
+button { font:inherit; border:0; border-radius:10px; padding:11px 20px; background:var(--azul); color:#fff; cursor:pointer; font-weight:600; }
+button:hover:not(:disabled) { background:var(--azul-osc); }
+button:disabled { background:#c3c7d6; cursor:not-allowed; }
+button.sec, a.sec { background:#fff; color:var(--azul); border:1.5px solid #c9cdf0; padding:9px 16px; font-weight:600; border-radius:10px; text-decoration:none; display:inline-block; }
+button.sec:hover:not(:disabled) { background:var(--azul2); border-color:var(--azul); }
+button.link { background:none; color:var(--azul); padding:4px 2px; font-weight:600; text-decoration:underline; }
+button.link:hover { background:none; color:var(--azul-osc); }
+button.grande { font-size:17px; padding:14px 28px; }
+button.peligro { background:var(--rojo); } button.peligro:hover:not(:disabled) { background:#8f1b12; }
+.acciones { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:24px; padding-top:20px; border-top:1px solid var(--borde); }
+.acciones .der { margin-left:auto; display:flex; gap:12px; align-items:center; }
+.motivo { color:var(--gris); font-size:14px; }
+.lista-estado { list-style:none; padding:0; margin:0; }
+.lista-estado li { display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-top:1px solid var(--borde); }
+.lista-estado li:first-child { border-top:0; }
+.ico { flex:none; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:14px; font-weight:800; }
+.ico.ok { background:var(--verde2); color:var(--verde); } .ico.warn { background:var(--ambar2); color:var(--ambar); } .ico.mal { background:var(--rojo2); color:var(--rojo); } .ico.info { background:var(--gris2); color:var(--gris); }
+.lista-estado .det { color:var(--gris); font-size:14px; }
 table { width:100%; border-collapse:collapse; font-size:14px; }
-th, td { border-bottom:1px solid var(--borde); padding:7px 8px; text-align:left; vertical-align:top; }
-th { background:#f1f2f7; font-weight:600; position:sticky; top:0; }
-td.num { text-align:right; white-space:nowrap; }
-.small { font-size:12.5px; } .muted { color:var(--gris); }
+th, td { border-bottom:1px solid var(--borde); padding:8px 8px; text-align:left; vertical-align:top; }
+th { background:var(--gris2); font-weight:600; position:sticky; top:0; z-index:1; }
+td.num, th.num { text-align:right; white-space:nowrap; }
+.cob td, .cob th { text-align:center; padding:7px 4px; font-size:13px; }
+.cob td:first-child, .cob th:first-child { text-align:left; padding-left:10px; white-space:nowrap; font-weight:600; }
+.mes { display:inline-block; width:26px; height:26px; line-height:26px; border-radius:7px; font-weight:700; font-size:13px; }
+.mes.ok { background:var(--verde2); color:var(--verde); } .mes.falta { background:var(--ambar2); color:var(--ambar); } .mes.futuro { color:#b8bccb; }
+.small { font-size:13px; } .muted { color:var(--gris); }
 tr.mal td { background:var(--rojo2); }
-tr.revisar td { background:var(--ambar2); } tr.excluido td { opacity:.55; }
-td input:not([type=checkbox]), td select { width:100%; min-width:160px; font:inherit; padding:5px 7px; border:1px solid var(--borde); border-radius:7px; }
-.estado { font-size:12px; font-weight:700; padding:3px 8px; border-radius:20px; white-space:nowrap; }
-.estado.LISTO { background:var(--verde2); color:var(--verde); } .estado.REVISAR { background:var(--ambar2); color:var(--ambar); } .estado.EMITIDO { background:#eceef3; color:var(--gris); }
-.chip { display:inline-block; background:#eceef3; border-radius:20px; padding:5px 12px; margin:0 6px 6px 0; font-size:13.5px; font-weight:600; }
-.chip.ok { background:var(--verde2); color:var(--verde); } .chip.warn { background:var(--ambar2); color:var(--ambar); }
+tr.revisar td { background:#fffaf0; } tr.excluido td { opacity:.5; }
+td input:not([type=checkbox]), td select { width:100%; min-width:170px; font:inherit; font-size:14px; padding:6px 8px; border:1px solid var(--borde); border-radius:8px; }
+.estado { font-size:12px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+.estado.LISTO { background:var(--verde2); color:var(--verde); } .estado.REVISAR { background:var(--ambar2); color:var(--ambar); } .estado.EMITIDO { background:var(--gris2); color:var(--gris); }
+.metricas { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:18px; }
+.metrica { background:var(--gris2); border-radius:12px; padding:14px 16px; border:2px solid transparent; cursor:pointer; text-align:left; color:var(--texto); font-weight:400; }
+.metrica:hover { background:var(--gris2); border-color:#c9cdf0; }
+.metrica.sel { border-color:var(--azul); background:var(--azul2); }
+.metrica b { display:block; font-size:28px; font-weight:700; line-height:1.2; }
+.metrica span { font-size:13.5px; color:var(--gris); }
+.metrica.ok b { color:var(--verde); } .metrica.warn b { color:var(--ambar); }
 .fila { display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin:10px 0; }
-.campo label { display:block; font-size:13px; font-weight:600; margin-bottom:3px; }
-.campo input { font:inherit; padding:8px 10px; border:1px solid var(--borde); border-radius:8px; min-width:180px; }
-details.ajustes { margin-top:14px; } details summary { cursor:pointer; font-weight:600; color:var(--azul); }
+.campo label { display:block; font-size:13.5px; font-weight:600; margin-bottom:4px; }
+.campo input, .campo select { font:inherit; padding:9px 11px; border:1px solid #cfd3de; border-radius:9px; min-width:180px; background:#fff; }
+details.mas { margin-top:14px; border:1px solid var(--borde); border-radius:12px; padding:12px 16px; }
+details.mas summary { cursor:pointer; font-weight:600; color:var(--azul); }
+details.mas[open] summary { margin-bottom:10px; }
+#zona { display:block; border:2px dashed #aab1d3; border-radius:12px; padding:22px; text-align:center; background:var(--azul2); cursor:pointer; }
+#zona.sobre { background:#dfe3ff; border-color:var(--azul); }
+#zona strong { font-size:16px; display:block; margin-bottom:4px; }
 #avisos { position:fixed; right:18px; bottom:18px; width:380px; max-height:45vh; overflow:auto; display:flex; flex-direction:column; gap:8px; z-index:5; }
-.aviso { padding:10px 14px; border-radius:10px; background:#fff; border-left:5px solid var(--azul); box-shadow:0 4px 14px rgba(0,0,0,.12); font-size:13.5px; }
+.aviso { padding:11px 14px; border-radius:10px; background:#fff; border-left:5px solid var(--azul); box-shadow:0 4px 14px rgba(0,0,0,.12); font-size:14px; }
 .aviso.ok { border-color:var(--verde); } .aviso.error { border-color:var(--rojo); } .aviso.warn { border-color:var(--ambar); }
-.tabla-scroll { max-height:620px; overflow:auto; border:1px solid var(--borde); border-radius:10px; }
+.tabla-scroll { max-height:560px; overflow:auto; border:1px solid var(--borde); border-radius:12px; }
 #paginas { margin-top:10px; } .pag { background:#fff; color:var(--azul); border:1px solid var(--borde); padding:5px 10px; margin-right:4px; }
 .pag.act { background:var(--azul); color:#fff; }
 #modal { position:fixed; inset:0; background:rgba(10,12,30,.6); display:grid; place-items:center; z-index:10; }
-#modal[hidden] { display:none; }
 .modal-caja { background:#fff; width:min(900px,95vw); height:92vh; border-radius:14px; display:flex; flex-direction:column; overflow:hidden; }
-.modal-caja header { padding:10px 16px; } #visor { flex:1; border:0; width:100%; }
-.check { display:flex; gap:10px; align-items:flex-start; background:var(--azul2); padding:12px 14px; border-radius:10px; margin:12px 0; }
-.check input { width:20px; height:20px; margin-top:2px; }
-#caja-plantillas.falta { background:var(--rojo2); outline:2px solid var(--rojo); }
-progress { width:100%; height:18px; }
-ol.instr li { margin-bottom:6px; }
-footer { text-align:center; color:var(--gris); font-size:12px; padding:20px; }
+.modal-caja header { padding:10px 16px; background:var(--azul); color:#fff; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+#visor { flex:1; border:0; width:100%; }
+.check { display:flex; gap:12px; align-items:flex-start; background:var(--azul2); padding:14px 16px; border-radius:12px; margin:12px 0; cursor:pointer; }
+.check input { width:22px; height:22px; margin-top:1px; flex:none; accent-color:var(--azul); }
+.caja { border-radius:12px; padding:16px 18px; margin:14px 0; }
+.caja.info { background:var(--azul2); } .caja.ok { background:var(--verde2); } .caja.warn { background:var(--ambar2); } .caja.mal { background:var(--rojo2); }
+.caja p { margin:4px 0; }
+.grande-num { font-size:20px; line-height:1.45; margin:0 0 6px; }
+.grande-num b { color:var(--azul); }
+input#p-numero { font-size:22px; font-weight:700; width:140px; min-width:0; text-align:center; }
+.puntos { display:flex; gap:8px; align-items:center; margin:8px 0; }
+.punto { width:30px; height:30px; border-radius:50%; background:var(--gris2); display:grid; place-items:center; font-weight:700; color:var(--gris); }
+.punto.ok { background:var(--verde2); color:var(--verde); }
+progress { width:100%; height:14px; accent-color:var(--azul); }
+.lote { border:1px solid var(--borde); border-radius:14px; padding:18px 20px; margin-bottom:14px; }
+.lote h3 { margin:0 0 2px; }
+.etapas { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+.etapa { border:1px solid var(--borde); border-radius:12px; padding:16px; }
+.etapa.hecha { background:var(--verde2); border-color:#bfe3cc; }
+.etapa h4 { margin:0 0 4px; font-size:15.5px; } .etapa p { margin:0 0 12px; color:var(--gris); font-size:14px; }
+#bienvenida { text-align:center; padding:56px 28px; }
+#bienvenida h2 { font-size:26px; margin:0 0 8px; }
+.pie-ayuda { text-align:center; color:var(--gris); font-size:13.5px; padding:10px 20px 28px; }
+@media (max-width:760px) { nav#pasos small { display:none; } .etapas { grid-template-columns:1fr; } .paso { padding:20px 16px; } }
 </style>
 </head>
 <body>
-<header>
-  <div><h1>Certificados de donación · Crea+</h1><p>Herramienta interna · versión 0.4 (prueba)</p></div>
-  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><div class="privado">🔒 Los datos se procesan en esta computadora. Solo se guardan en el SharePoint de Crea+.</div><div id="sesion"></div></div>
+<header class="barra">
+  <div class="marca"><div class="logo">C+</div><div><h1>Certificados de donación</h1><p>Crea+ · Amigos Crea+ 2026</p></div></div>
+  <div id="sesion"></div>
 </header>
 <main>
 
-<section class="paso" id="paso1">
-  <h2><span class="n">1</span> Sube los archivos</h2>
-  <p class="ayuda" id="ayuda-paso1">Arrastra aquí, todos juntos: los reportes de <b>Niubiz</b>, <b>AFRUS</b> y <b>MC Procesos / Izipay</b>, la <b>base de donantes</b> (DNI y correo) y los <b>manifiestos de lotes anteriores</b> (archivo manifiesto_envio.csv de cada ZIP), para que nadie reciba dos certificados. La primera vez agrega también las dos plantillas PDF (personas y empresas): quedan guardadas en este navegador.</p>
-  <label id="zona">
-    <strong>Arrastra los archivos aquí</strong>
-    <span class="muted">o haz clic para elegirlos · .csv, .xlsx, .pdf</span>
-    <input id="input-archivos" type="file" multiple accept=".csv,.xlsx,.xlsm,.pdf" hidden>
-  </label>
-  <p id="cargando" hidden>⏳ Leyendo archivos… (los reportes de Niubiz son grandes, puede tardar un minuto)</p>
-  <div class="tabla-scroll" style="margin-top:14px;max-height:260px">
-    <table id="tabla-archivos"><thead><tr><th>Archivo</th><th>Reconocido como</th><th class="num">Filas</th><th class="num">Cobros exitosos</th><th>Nota</th></tr></thead><tbody></tbody></table>
-  </div>
-  <p id="resumen-archivos" class="muted"></p>
-  <details class="ajustes"><summary>Ajustes del período (normalmente no hace falta cambiarlos)</summary>
+<section class="paso" id="bienvenida" hidden>
+  <h2>Hola 👋</h2>
+  <p class="sub">Con esta herramienta preparas y envías los certificados de donación del año.<br>Para empezar, entra con tu cuenta de Crea+.</p>
+  <button class="grande" id="btn-entrar-grande">Entrar con mi cuenta de Crea+</button>
+  <p class="small muted" style="margin-top:22px">Usa tu correo @creamas.org. No necesitas instalar nada.</p>
+  <p id="link-local" hidden><button class="link" id="btn-modo-local">Trabajar sin conexión (solo TI)</button></p>
+</section>
+
+<nav id="pasos" hidden>
+  <button class="pbtn" data-p="1"><span class="n">1</span><span><b>Revisar archivos</b><small>¿Está todo?</small></span></button>
+  <button class="pbtn" data-p="2"><span class="n">2</span><span><b>Revisar donantes</b><small>Corrige y mira ejemplos</small></span></button>
+  <button class="pbtn" data-p="3"><span class="n">3</span><span><b>Crear certificados</b><small>Se guardan en SharePoint</small></span></button>
+  <button class="pbtn" data-p="4"><span class="n">4</span><span><b>Enviar</b><small>Primero una prueba</small></span></button>
+</nav>
+
+<section class="paso" id="paso1" hidden>
+  <h2>Revisa que esté todo</h2>
+  <p class="sub" id="ayuda-paso1">La app lee sola la carpeta <b>Certificados 2026</b> de SharePoint: reportes de pago, base de correos y plantillas.</p>
+  <p id="cargando" class="caja info" hidden>⏳ Leyendo la carpeta… Los reportes de Niubiz son grandes: puede tardar uno o dos minutos.</p>
+  <div id="cobertura"></div>
+  <ul class="lista-estado" id="estado-general"></ul>
+  <details class="mas" id="det-archivos"><summary>Ver los archivos leídos</summary>
+    <div class="tabla-scroll" style="max-height:280px">
+      <table id="tabla-archivos"><thead><tr><th>Archivo</th><th>Qué es</th><th class="num">Filas</th><th class="num">Pagos exitosos</th><th>Nota</th></tr></thead><tbody></tbody></table>
+    </div>
+    <p id="resumen-archivos" class="muted small"></p>
+  </details>
+  <details class="mas" id="det-zona"><summary>Agregar un archivo que no está en la carpeta</summary>
+    <label id="zona">
+      <strong>Arrastra los archivos aquí</strong>
+      <span class="muted">o haz clic para elegirlos · .csv, .xlsx, .pdf</span>
+      <input id="input-archivos" type="file" multiple accept=".csv,.xlsx,.xlsm,.pdf" hidden>
+    </label>
+    <p class="small muted">Lo ideal es guardar los reportes en la carpeta <b>01_REPORTES</b> para que queden para la próxima vez.</p>
+  </details>
+  <details class="mas"><summary>Opciones avanzadas</summary>
     <div class="fila">
       <div class="campo"><label for="p-desde">Pagos desde</label><input type="date" id="p-desde" value="2026-01-01"></div>
       <div class="campo"><label for="p-hasta">Pagos hasta</label><input type="date" id="p-hasta" value="2026-12-31"></div>
@@ -87,63 +161,110 @@ footer { text-align:center; color:var(--gris); font-size:12px; padding:20px; }
     </div>
     <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="p-docnombre" checked> Incluir el DNI/RUC en el nombre de cada PDF (como los certificados oficiales)</label>
   </details>
-  <div class="fila"><button id="btn-sp" class="grande" hidden>⟳ Actualizar desde SharePoint</button><button id="btn-revisar" class="grande" disabled>Revisar donantes →</button><button id="btn-reiniciar" class="sec">Empezar de nuevo</button></div>
+  <div class="acciones">
+    <button id="btn-sp" class="sec" hidden>⟳ Leer la carpeta otra vez</button>
+    <button id="btn-reiniciar" class="link">Empezar de nuevo</button>
+    <div class="der"><span class="motivo" id="motivo-1"></span><button id="btn-revisar" class="grande" disabled>Continuar →</button></div>
+  </div>
 </section>
 
 <section class="paso" id="paso2" hidden>
-  <h2><span class="n">2</span> Revisa la lista</h2>
-  <p class="ayuda">Cada fila es un donante con sus <b>cobros exitosos</b> del período (los rechazados y duplicados ya se quitaron). En <span class="estado REVISAR">Revisar</span> falta algo: corrige el nombre o el correo en la misma tabla, o desmarca la casilla para dejarlo fuera.</p>
-  <div id="contadores"></div>
+  <h2>Revisa a los donantes</h2>
+  <p class="sub">Cada persona aparece una sola vez, con todas sus donaciones exitosas del año. Solo tienes que mirar las que <b>necesitan tu ayuda</b>.</p>
+  <div class="metricas" id="contadores"></div>
+  <div id="ayuda-filtro" class="caja warn" hidden></div>
   <div class="fila">
     <div class="campo"><label for="filtro">Mostrar</label>
-      <select id="filtro" style="font:inherit;padding:8px;border-radius:8px;border:1px solid var(--borde)">
-        <option value="REVISAR">Para revisar</option><option value="LISTO">Listos</option><option value="EMITIDO">Ya emitidos</option><option value="EXCLUIDOS">Excluidos</option><option value="TODOS">Todos</option>
+      <select id="filtro">
+        <option value="REVISAR">Necesitan tu ayuda</option><option value="LISTO">Listos</option><option value="EMITIDO">Ya tienen certificado</option><option value="EXCLUIDOS">Dejados fuera</option><option value="TODOS">Todos</option>
       </select></div>
     <div class="campo"><label for="buscar">Buscar</label><input id="buscar" placeholder="Nombre, DNI o correo"></div>
   </div>
   <div class="tabla-scroll">
-    <table id="tabla-donantes"><thead><tr><th></th><th>Estado</th><th>Nombre</th><th>DNI / RUC</th><th>Correo</th><th class="num">Cobros</th><th class="num">Total</th><th>Detalle</th><th>Observaciones</th><th></th></tr></thead><tbody></tbody></table>
+    <table id="tabla-donantes"><thead><tr><th title="Incluir">Incluir</th><th>Estado</th><th>Nombre</th><th>DNI / RUC</th><th>Correo</th><th class="num">Pagos</th><th class="num">Total</th><th>Detalle</th><th>Qué falta</th><th></th></tr></thead><tbody></tbody></table>
   </div>
   <div id="paginas"></div>
   <div id="sin-doc" style="margin-top:12px"></div>
+  <div class="caja info" style="margin-top:22px">
+    <h3>Mira 3 certificados de ejemplo</h3>
+    <p>Abre tres certificados y revisa que el nombre, el DNI, los montos y los meses estén bien. Puedes usar el botón de abajo o <b>Ver PDF</b> en cualquier fila.</p>
+    <div class="puntos" id="estado-muestras"></div>
+    <button class="sec" id="btn-muestra">Ver un ejemplo</button>
+  </div>
+  <div class="acciones">
+    <button class="link" data-ir="1">← Atrás</button>
+    <div class="der"><span class="motivo" id="motivo-2"></span><button id="btn-a-paso3" class="grande" disabled>Continuar →</button></div>
+  </div>
 </section>
 
 <section class="paso" id="paso3" hidden>
-  <h2><span class="n">3</span> Genera los certificados</h2>
-  <p class="ayuda">Antes de generar, abre al menos <b>3 certificados de muestra</b> con el botón <b>Ver PDF</b> de la tabla y revisa nombre, DNI, montos y fecha.</p>
-  <div id="caja-plantillas" class="check" style="display:block">
-    <p id="estado-plantillas" style="margin:0 0 8px"></p>
-    <label class="sec" style="display:inline-block;cursor:pointer;border:1.5px solid var(--azul);color:var(--azul);background:#fff;border-radius:10px;padding:8px 14px;font-weight:600">
-      Cargar plantillas PDF<input id="input-plantillas" type="file" accept=".pdf" multiple hidden></label>
-    <span class="muted small">Archivos <b>plantilla_personas.pdf</b> y <b>plantilla_empresas.pdf</b>. Solo la primera vez: quedan guardados en este navegador.</span>
+  <h2>Crea los certificados</h2>
+  <p class="sub">Se crean con la plantilla oficial y se guardan en la carpeta <b>04_LOTES</b> de SharePoint. Todavía no se envía nada.</p>
+  <div id="form-crear">
+  <p class="grande-num" id="resumen-crear"></p>
+  <div id="caja-plantillas" class="caja mal" hidden>
+    <p id="estado-plantillas"></p>
+    <label class="sec" style="display:inline-block;cursor:pointer;margin-top:6px">Elegir plantillas PDF<input id="input-plantillas" type="file" accept=".pdf" multiple hidden></label>
+    <p class="small">Archivos <b>plantilla_personas.pdf</b> y <b>plantilla_empresas.pdf</b> de la carpeta 05_HERRAMIENTA.</p>
   </div>
-  <p id="estado-muestras" class="muted"></p>
-  <div class="fila">
-    <div class="campo"><label for="p-numero">Siguiente número libre (columna C de REPORTE)</label><input id="p-numero" placeholder="ej. 291"></div>
-    <div class="campo"><label for="p-emision">Fecha de emisión</label><input type="date" id="p-emision"></div>
+  <div class="tarjeta" style="margin:16px 0;padding:20px 22px">
+    <h3>Número del primer certificado</h3>
+    <div class="fila" style="align-items:center">
+      <span style="font-size:20px;font-weight:700;color:var(--gris)">002-000021,</span><input id="p-numero" inputmode="numeric" aria-label="Número del primer certificado">
+      <span class="muted" id="rango-numeros"></span>
+    </div>
+    <p class="small muted" id="origen-numero">La app propone el número siguiente al último que ella misma emitió.</p>
+    <div class="caja warn" style="margin-bottom:0">
+      <p><b>Antes de seguir, confírmalo en el Excel oficial.</b> Si alguien emitió certificados desde el Excel (por ejemplo, de empresas), el número pudo avanzar. Abre el Excel, ve a la hoja <b>REPORTE</b> y busca en la <b>columna C</b> el primer número que todavía no tiene nombre.</p>
+      <label class="check" style="background:#fff;margin-bottom:0"><input type="checkbox" id="confirmo-num"><span id="texto-confirmo-num">Revisé el Excel oficial y este número está libre.</span></label>
+    </div>
   </div>
-  <p id="rango-numeros" class="muted"></p>
-  <label class="check"><input type="checkbox" id="confirmo"><span>Revisé las muestras y confirmo que los datos son correctos. Entiendo que estos certificados son documentos oficiales de Crea+.</span></label>
-  <button id="btn-generar-sp" class="grande" disabled hidden>Generar y guardar en SharePoint</button> <button id="btn-generar" class="sec" disabled>Generar certificados (descargar ZIP)</button>
+  <details class="mas"><summary>Cambiar la fecha de emisión</summary>
+    <div class="campo"><label for="p-emision">Fecha de emisión que aparece en los certificados</label><input type="date" id="p-emision"></div>
+  </details>
+  <label class="check"><input type="checkbox" id="confirmo"><span>Revisé los ejemplos y los datos son correctos. Entiendo que estos certificados son documentos oficiales de Crea+.</span></label>
+  </div>
   <div id="progreso" hidden style="margin-top:14px"><progress id="barra" max="100" value="0"></progress><p id="progreso-texto"></p></div>
+  <div id="post-crear" class="caja ok" hidden>
+    <h3 id="post-crear-titulo">Certificados creados</h3>
+    <p><b>Último paso antes de enviar: anótalos en el Excel oficial</b>, para que nadie más use esos números.</p>
+    <ol>
+      <li>Pulsa <b>Descargar filas para el Excel</b>.</li>
+      <li>Abre el archivo descargado, selecciona todo (Ctrl+E) y copia (Ctrl+C).</li>
+      <li>En el Excel oficial, hoja <b>REPORTE</b>, haz clic en la <b>columna B</b> de la fila del número <b id="post-crear-num"></b> y pega (Ctrl+V).</li>
+    </ol>
+    <button class="sec" id="btn-descargar-filas">Descargar filas para el Excel</button>
+  </div>
+  <div class="acciones">
+    <button class="link" data-ir="2">← Atrás</button>
+    <div class="der"><span class="motivo" id="motivo-3"></span><button id="btn-generar" class="sec" disabled hidden>Crear y descargar ZIP</button><button id="btn-generar-sp" class="grande" disabled hidden>Crear certificados</button><button id="btn-a-paso4" class="grande" hidden>Ir a enviar →</button></div>
+  </div>
 </section>
 
-<section class="paso" id="paso4">
-  <h2><span class="n">4</span> Enviar por correo</h2>
+<section class="paso" id="paso4" hidden>
+  <h2>Envía los certificados</h2>
   <div id="paso4-sp" hidden>
-    <p class="ayuda">Cada lote guardado en SharePoint aparece aquí. El envío sale desde el buzón institucional, uno por uno, y queda anotado en <b>03_CONTROL/Registro certificados 2026.xlsx</b>. Si se interrumpe, vuelve a pulsar <b>Enviar</b>: solo se envían los pendientes.</p>
-    <label class="check"><input type="checkbox" id="modo-prueba" checked><span><b>Modo prueba</b>: todos los correos llegan a <b>tu</b> correo, no a los donantes. Desmárcalo solo para el envío real.</span></label>
-    <div id="lista-lotes" class="tabla-scroll" style="max-height:320px"></div>
-    <div id="envio-progreso" hidden style="margin-top:14px"><progress id="envio-barra" max="100" value="0"></progress><p id="envio-texto"></p></div>
+    <p class="sub">Los correos salen desde <b id="buzon-texto">amigos@creamas.org</b>, uno por uno. Si se corta la conexión o cierras la ventana, vuelve a entrar y pulsa <b>Enviar</b> otra vez: solo se envían los que faltan.</p>
+    <div id="lista-lotes"></div>
+    <div id="envio-progreso" class="caja info" hidden><progress id="envio-barra" max="100" value="0"></progress><p id="envio-texto"></p></div>
+    <div class="tarjeta" style="margin-top:22px">
+      <h3>¿Un donante dice que no le llegó?</h3>
+      <p class="muted small" style="margin-top:0">Búscalo por nombre o DNI y reenvíale su certificado. Si cambió de correo, corrígelo antes de reenviar.</p>
+      <div class="campo"><input id="buscar-reenvio" placeholder="Nombre o DNI" style="width:100%;max-width:420px"></div>
+      <div id="resultados-reenvio"></div>
+    </div>
   </div>
-  <ol class="instr" id="paso4-local">
-    <li>Se descarga un archivo <b>.zip</b>. Guárdalo completo en la carpeta privada de certificados en SharePoint.</li>
-    <li>Abre <b>filas_para_REPORTE.txt</b>, copia todo y pégalo en la hoja <b>REPORTE</b> del libro oficial, en la <b>columna B</b> de la fila del primer número usado.</li>
-    <li>El envío por correo se hace desde la carpeta de SharePoint (siguiente versión de esta herramienta).</li>
+  <ol id="paso4-local">
+    <li>Se descargó un archivo <b>.zip</b>. Guárdalo completo en la carpeta 04_LOTES de SharePoint.</li>
+    <li>Abre <b>filas_para_REPORTE.txt</b>, copia todo y pégalo en la hoja <b>REPORTE</b> del Excel oficial, columna B de la fila del primer número usado.</li>
+    <li>Para enviar por correo, entra con tu cuenta de Crea+.</li>
   </ol>
+  <div class="acciones"><button class="link" data-ir="3">← Atrás</button></div>
 </section>
-</main>
-<section class="paso" style="max-width:1280px;margin:0 auto 18px"><details><summary>Configuración (solo TI)</summary>
+
+<section class="paso" id="config-ti" hidden>
+  <h2 style="font-size:19px">Configuración (solo TI)</h2>
+  <p class="sub small">Esta sección solo aparece al abrir la app con <b>#ti</b> al final de la dirección.</p>
   <div class="fila">
     <div class="campo"><label for="cfg-clientId">Id. de aplicación (cliente)</label><input id="cfg-clientId" style="min-width:320px"></div>
     <div class="campo"><label for="cfg-tenantId">Id. de directorio (inquilino)</label><input id="cfg-tenantId" style="min-width:320px"></div>
@@ -157,14 +278,17 @@ footer { text-align:center; color:var(--gris); font-size:12px; padding:20px; }
   </div><button class="sec" id="cfg-guardar">Guardar configuración</button>
   <button class="sec" id="cfg-preparar">Crear o completar la carpeta en SharePoint</button>
   <p class="muted small">Crea la carpeta con sus subcarpetas (01_REPORTES … 06_MANUAL) y sube las plantillas cargadas en este navegador. No borra ni reemplaza nada.</p>
-  <p id="enlace-carpeta"></p></details></section>
-<footer>Crea+ · Certificados de donación · uso interno · contiene pdf-lib (MIT) y JSZip (MIT)</footer>
+  <p id="enlace-carpeta"></p>
+</section>
+</main>
+<p class="pie-ayuda">¿Dudas o algo no funciona? Escribe a <b>jcabrera@creamas.org</b> · Crea+ · uso interno · contiene pdf-lib (MIT) y JSZip (MIT)</p>
 <div id="avisos"></div>
-<div id="modal" hidden><div class="modal-caja"><header style="background:var(--azul);color:#fff;display:flex;justify-content:space-between;align-items:center"><b>Certificado de muestra</b><span><a class="sec" id="descargar-muestra" style="background:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;margin-right:8px">Descargar PDF</a><button class="sec" id="cerrar-modal" style="background:#fff">Cerrar</button></span></header><iframe id="visor" title="Vista previa del certificado"></iframe><div id="visor-alt" hidden style="padding:32px;text-align:center"><p>Este navegador no puede mostrar el PDF dentro de la página.</p><p>Pulsa <b>Descargar PDF</b> (arriba) y ábrelo para revisarlo. En una computadora con Edge o Chrome se ve aquí mismo.</p></div></div></div>
+<div id="modal" hidden><div class="modal-caja"><header><b>Certificado de ejemplo</b><span><a class="sec" id="descargar-muestra" style="margin-right:8px">Descargar PDF</a><button class="sec" id="cerrar-modal">Cerrar</button></span></header><iframe id="visor" title="Vista previa del certificado"></iframe><div id="visor-alt" hidden style="padding:32px;text-align:center"><p>Este navegador no puede mostrar el PDF dentro de la página.</p><p>Pulsa <b>Descargar PDF</b> (arriba) y ábrelo para revisarlo. En una computadora con Edge o Chrome se ve aquí mismo.</p></div></div></div>
 <script>/*__PDFLIB__*/</script>
 <script>/*__JSZIP__*/</script>
 <script>window.CD_CFG = /*__CFG__*/{};</script>
 <script>/*__APP__*/</script>
 <script>/*__M365__*/</script>
+<script>/*__UX__*/</script>
 </body>
 </html>

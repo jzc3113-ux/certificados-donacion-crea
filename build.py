@@ -7,7 +7,7 @@ import os
 B = os.path.dirname(os.path.abspath(__file__))
 html = open(os.path.join(B, 'src/index.html'), encoding='utf-8').read()
 partes = {'/*__PDFLIB__*/': 'vendor/pdf-lib.min.js', '/*__JSZIP__*/': 'vendor/jszip.min.js',
-          '/*__APP__*/': 'src/app.js', '/*__M365__*/': 'src/m365.js'}
+          '/*__APP__*/': 'src/app.js', '/*__M365__*/': 'src/m365.js', '/*__UX__*/': 'src/ux.js'}
 for marca, ruta in partes.items():
     code = open(os.path.join(B, ruta), encoding='utf-8').read().replace('</script', '<\\/script').replace('//# sourceMappingURL=', '// ')
     assert html.count(marca) == 1, marca

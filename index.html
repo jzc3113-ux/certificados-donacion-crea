@@ -5,79 +5,153 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Certificados de donación · Crea+</title>
 <style>
-:root { --azul:#1a1ab8; --azul2:#eef0ff; --verde:#0f7b3f; --verde2:#e7f6ec; --ambar:#9a5b00; --ambar2:#fff4df; --rojo:#b42318; --rojo2:#fdecea; --gris:#5f6470; --borde:#d9dce3; }
+:root { --azul:#1a1ab8; --azul-osc:#12127f; --azul2:#eef0ff; --verde:#0f7b3f; --verde2:#e7f6ec; --ambar:#8a5200; --ambar2:#fff4df; --rojo:#b42318; --rojo2:#fdecea; --gris:#5f6470; --gris2:#f1f2f7; --borde:#e1e4ec; --texto:#1d2030; }
 * { box-sizing:border-box; }
-body { margin:0; font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:#1d2030; background:#f6f7fb; }
-header { background:var(--azul); color:#fff; padding:18px 28px; display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
-header h1 { margin:0; font-size:22px; } header p { margin:2px 0 0; opacity:.85; font-size:13px; }
-.privado { background:rgba(255,255,255,.14); border-radius:10px; padding:8px 12px; font-size:13px; max-width:360px; }
-main { max-width:1280px; margin:0 auto; padding:22px; }
-.paso { background:#fff; border:1px solid var(--borde); border-radius:14px; padding:20px 22px; margin-bottom:18px; }
-.paso h2 { margin:0 0 4px; font-size:19px; display:flex; align-items:center; gap:10px; }
-.n { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; background:var(--azul); color:#fff; font-size:15px; flex:none; }
-.ayuda { color:var(--gris); margin:0 0 14px; }
-#zona { display:block; border:2.5px dashed #9aa3c7; border-radius:14px; padding:34px; text-align:center; background:var(--azul2); cursor:pointer; }
-#zona.sobre { background:#dfe3ff; border-color:var(--azul); }
-#zona strong { font-size:18px; display:block; margin-bottom:6px; }
-button { font:inherit; border:0; border-radius:10px; padding:12px 20px; background:var(--azul); color:#fff; cursor:pointer; font-weight:600; }
-button:disabled { background:#b9bdd0; cursor:not-allowed; }
-button.sec { background:#fff; color:var(--azul); border:1.5px solid var(--azul); padding:6px 12px; font-weight:600; }
-button.grande { font-size:17px; padding:14px 26px; }
+body { margin:0; font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:var(--texto); background:#f6f7fb; }
+[hidden] { display:none !important; }
+header.barra { background:var(--azul); color:#fff; padding:14px 28px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+.marca { display:flex; align-items:center; gap:12px; }
+.logo { width:38px; height:38px; border-radius:10px; background:#fff; color:var(--azul); display:grid; place-items:center; font-weight:800; font-size:17px; }
+.marca h1 { margin:0; font-size:19px; font-weight:700; } .marca p { margin:0; font-size:13px; opacity:.8; }
+#sesion { display:flex; align-items:center; gap:10px; font-size:14px; }
+#sesion button { background:#fff; color:var(--azul); border:0; padding:8px 14px; }
+main { max-width:1100px; margin:0 auto; padding:24px 20px 40px; }
+nav#pasos { display:flex; gap:8px; margin:0 0 20px; }
+.pbtn { flex:1; display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--borde); border-radius:12px; padding:12px 14px; font:inherit; color:var(--gris); text-align:left; cursor:default; }
+.pbtn .n { flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:var(--gris2); color:var(--gris); font-weight:700; font-size:14px; }
+.pbtn b { display:block; font-size:14.5px; font-weight:600; } .pbtn small { font-size:12.5px; }
+.pbtn.actual { border:2px solid var(--azul); color:var(--texto); } .pbtn.actual .n { background:var(--azul); color:#fff; }
+.pbtn.hecho { cursor:pointer; color:var(--texto); } .pbtn.hecho .n { background:var(--verde2); color:var(--verde); }
+.pbtn.hecho:hover { border-color:var(--azul); }
+.paso, .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:16px; padding:26px 28px; margin-bottom:18px; }
+.paso h2 { margin:0 0 4px; font-size:23px; font-weight:700; }
+.sub { color:var(--gris); margin:0 0 20px; font-size:16px; }
+h3 { font-size:17px; margin:0 0 8px; }
+button { font:inherit; border:0; border-radius:10px; padding:11px 20px; background:var(--azul); color:#fff; cursor:pointer; font-weight:600; }
+button:hover:not(:disabled) { background:var(--azul-osc); }
+button:disabled { background:#c3c7d6; cursor:not-allowed; }
+button.sec, a.sec { background:#fff; color:var(--azul); border:1.5px solid #c9cdf0; padding:9px 16px; font-weight:600; border-radius:10px; text-decoration:none; display:inline-block; }
+button.sec:hover:not(:disabled) { background:var(--azul2); border-color:var(--azul); }
+button.link { background:none; color:var(--azul); padding:4px 2px; font-weight:600; text-decoration:underline; }
+button.link:hover { background:none; color:var(--azul-osc); }
+button.grande { font-size:17px; padding:14px 28px; }
+button.peligro { background:var(--rojo); } button.peligro:hover:not(:disabled) { background:#8f1b12; }
+.acciones { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:24px; padding-top:20px; border-top:1px solid var(--borde); }
+.acciones .der { margin-left:auto; display:flex; gap:12px; align-items:center; }
+.motivo { color:var(--gris); font-size:14px; }
+.lista-estado { list-style:none; padding:0; margin:0; }
+.lista-estado li { display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-top:1px solid var(--borde); }
+.lista-estado li:first-child { border-top:0; }
+.ico { flex:none; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:14px; font-weight:800; }
+.ico.ok { background:var(--verde2); color:var(--verde); } .ico.warn { background:var(--ambar2); color:var(--ambar); } .ico.mal { background:var(--rojo2); color:var(--rojo); } .ico.info { background:var(--gris2); color:var(--gris); }
+.lista-estado .det { color:var(--gris); font-size:14px; }
 table { width:100%; border-collapse:collapse; font-size:14px; }
-th, td { border-bottom:1px solid var(--borde); padding:7px 8px; text-align:left; vertical-align:top; }
-th { background:#f1f2f7; font-weight:600; position:sticky; top:0; }
-td.num { text-align:right; white-space:nowrap; }
-.small { font-size:12.5px; } .muted { color:var(--gris); }
+th, td { border-bottom:1px solid var(--borde); padding:8px 8px; text-align:left; vertical-align:top; }
+th { background:var(--gris2); font-weight:600; position:sticky; top:0; z-index:1; }
+td.num, th.num { text-align:right; white-space:nowrap; }
+.cob td, .cob th { text-align:center; padding:7px 4px; font-size:13px; }
+.cob td:first-child, .cob th:first-child { text-align:left; padding-left:10px; white-space:nowrap; font-weight:600; }
+.mes { display:inline-block; width:26px; height:26px; line-height:26px; border-radius:7px; font-weight:700; font-size:13px; }
+.mes.ok { background:var(--verde2); color:var(--verde); } .mes.falta { background:var(--ambar2); color:var(--ambar); } .mes.futuro { color:#b8bccb; }
+.small { font-size:13px; } .muted { color:var(--gris); }
 tr.mal td { background:var(--rojo2); }
-tr.revisar td { background:var(--ambar2); } tr.excluido td { opacity:.55; }
-td input:not([type=checkbox]), td select { width:100%; min-width:160px; font:inherit; padding:5px 7px; border:1px solid var(--borde); border-radius:7px; }
-.estado { font-size:12px; font-weight:700; padding:3px 8px; border-radius:20px; white-space:nowrap; }
-.estado.LISTO { background:var(--verde2); color:var(--verde); } .estado.REVISAR { background:var(--ambar2); color:var(--ambar); } .estado.EMITIDO { background:#eceef3; color:var(--gris); }
-.chip { display:inline-block; background:#eceef3; border-radius:20px; padding:5px 12px; margin:0 6px 6px 0; font-size:13.5px; font-weight:600; }
-.chip.ok { background:var(--verde2); color:var(--verde); } .chip.warn { background:var(--ambar2); color:var(--ambar); }
+tr.revisar td { background:#fffaf0; } tr.excluido td { opacity:.5; }
+td input:not([type=checkbox]), td select { width:100%; min-width:170px; font:inherit; font-size:14px; padding:6px 8px; border:1px solid var(--borde); border-radius:8px; }
+.estado { font-size:12px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+.estado.LISTO { background:var(--verde2); color:var(--verde); } .estado.REVISAR { background:var(--ambar2); color:var(--ambar); } .estado.EMITIDO { background:var(--gris2); color:var(--gris); }
+.metricas { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:18px; }
+.metrica { background:var(--gris2); border-radius:12px; padding:14px 16px; border:2px solid transparent; cursor:pointer; text-align:left; color:var(--texto); font-weight:400; }
+.metrica:hover { background:var(--gris2); border-color:#c9cdf0; }
+.metrica.sel { border-color:var(--azul); background:var(--azul2); }
+.metrica b { display:block; font-size:28px; font-weight:700; line-height:1.2; }
+.metrica span { font-size:13.5px; color:var(--gris); }
+.metrica.ok b { color:var(--verde); } .metrica.warn b { color:var(--ambar); }
 .fila { display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin:10px 0; }
-.campo label { display:block; font-size:13px; font-weight:600; margin-bottom:3px; }
-.campo input { font:inherit; padding:8px 10px; border:1px solid var(--borde); border-radius:8px; min-width:180px; }
-details.ajustes { margin-top:14px; } details summary { cursor:pointer; font-weight:600; color:var(--azul); }
+.campo label { display:block; font-size:13.5px; font-weight:600; margin-bottom:4px; }
+.campo input, .campo select { font:inherit; padding:9px 11px; border:1px solid #cfd3de; border-radius:9px; min-width:180px; background:#fff; }
+details.mas { margin-top:14px; border:1px solid var(--borde); border-radius:12px; padding:12px 16px; }
+details.mas summary { cursor:pointer; font-weight:600; color:var(--azul); }
+details.mas[open] summary { margin-bottom:10px; }
+#zona { display:block; border:2px dashed #aab1d3; border-radius:12px; padding:22px; text-align:center; background:var(--azul2); cursor:pointer; }
+#zona.sobre { background:#dfe3ff; border-color:var(--azul); }
+#zona strong { font-size:16px; display:block; margin-bottom:4px; }
 #avisos { position:fixed; right:18px; bottom:18px; width:380px; max-height:45vh; overflow:auto; display:flex; flex-direction:column; gap:8px; z-index:5; }
-.aviso { padding:10px 14px; border-radius:10px; background:#fff; border-left:5px solid var(--azul); box-shadow:0 4px 14px rgba(0,0,0,.12); font-size:13.5px; }
+.aviso { padding:11px 14px; border-radius:10px; background:#fff; border-left:5px solid var(--azul); box-shadow:0 4px 14px rgba(0,0,0,.12); font-size:14px; }
 .aviso.ok { border-color:var(--verde); } .aviso.error { border-color:var(--rojo); } .aviso.warn { border-color:var(--ambar); }
-.tabla-scroll { max-height:620px; overflow:auto; border:1px solid var(--borde); border-radius:10px; }
+.tabla-scroll { max-height:560px; overflow:auto; border:1px solid var(--borde); border-radius:12px; }
 #paginas { margin-top:10px; } .pag { background:#fff; color:var(--azul); border:1px solid var(--borde); padding:5px 10px; margin-right:4px; }
 .pag.act { background:var(--azul); color:#fff; }
 #modal { position:fixed; inset:0; background:rgba(10,12,30,.6); display:grid; place-items:center; z-index:10; }
-#modal[hidden] { display:none; }
 .modal-caja { background:#fff; width:min(900px,95vw); height:92vh; border-radius:14px; display:flex; flex-direction:column; overflow:hidden; }
-.modal-caja header { padding:10px 16px; } #visor { flex:1; border:0; width:100%; }
-.check { display:flex; gap:10px; align-items:flex-start; background:var(--azul2); padding:12px 14px; border-radius:10px; margin:12px 0; }
-.check input { width:20px; height:20px; margin-top:2px; }
-#caja-plantillas.falta { background:var(--rojo2); outline:2px solid var(--rojo); }
-progress { width:100%; height:18px; }
-ol.instr li { margin-bottom:6px; }
-footer { text-align:center; color:var(--gris); font-size:12px; padding:20px; }
+.modal-caja header { padding:10px 16px; background:var(--azul); color:#fff; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+#visor { flex:1; border:0; width:100%; }
+.check { display:flex; gap:12px; align-items:flex-start; background:var(--azul2); padding:14px 16px; border-radius:12px; margin:12px 0; cursor:pointer; }
+.check input { width:22px; height:22px; margin-top:1px; flex:none; accent-color:var(--azul); }
+.caja { border-radius:12px; padding:16px 18px; margin:14px 0; }
+.caja.info { background:var(--azul2); } .caja.ok { background:var(--verde2); } .caja.warn { background:var(--ambar2); } .caja.mal { background:var(--rojo2); }
+.caja p { margin:4px 0; }
+.grande-num { font-size:20px; line-height:1.45; margin:0 0 6px; }
+.grande-num b { color:var(--azul); }
+input#p-numero { font-size:22px; font-weight:700; width:140px; min-width:0; text-align:center; }
+.puntos { display:flex; gap:8px; align-items:center; margin:8px 0; }
+.punto { width:30px; height:30px; border-radius:50%; background:var(--gris2); display:grid; place-items:center; font-weight:700; color:var(--gris); }
+.punto.ok { background:var(--verde2); color:var(--verde); }
+progress { width:100%; height:14px; accent-color:var(--azul); }
+.lote { border:1px solid var(--borde); border-radius:14px; padding:18px 20px; margin-bottom:14px; }
+.lote h3 { margin:0 0 2px; }
+.etapas { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+.etapa { border:1px solid var(--borde); border-radius:12px; padding:16px; }
+.etapa.hecha { background:var(--verde2); border-color:#bfe3cc; }
+.etapa h4 { margin:0 0 4px; font-size:15.5px; } .etapa p { margin:0 0 12px; color:var(--gris); font-size:14px; }
+#bienvenida { text-align:center; padding:56px 28px; }
+#bienvenida h2 { font-size:26px; margin:0 0 8px; }
+.pie-ayuda { text-align:center; color:var(--gris); font-size:13.5px; padding:10px 20px 28px; }
+@media (max-width:760px) { nav#pasos small { display:none; } .etapas { grid-template-columns:1fr; } .paso { padding:20px 16px; } }
 </style>
 </head>
 <body>
-<header>
-  <div><h1>Certificados de donación · Crea+</h1><p>Herramienta interna · versión 0.4 (prueba)</p></div>
-  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><div class="privado">🔒 Los datos se procesan en esta computadora. Solo se guardan en el SharePoint de Crea+.</div><div id="sesion"></div></div>
+<header class="barra">
+  <div class="marca"><div class="logo">C+</div><div><h1>Certificados de donación</h1><p>Crea+ · Amigos Crea+ 2026</p></div></div>
+  <div id="sesion"></div>
 </header>
 <main>
 
-<section class="paso" id="paso1">
-  <h2><span class="n">1</span> Sube los archivos</h2>
-  <p class="ayuda" id="ayuda-paso1">Arrastra aquí, todos juntos: los reportes de <b>Niubiz</b>, <b>AFRUS</b> y <b>MC Procesos / Izipay</b>, la <b>base de donantes</b> (DNI y correo) y los <b>manifiestos de lotes anteriores</b> (archivo manifiesto_envio.csv de cada ZIP), para que nadie reciba dos certificados. La primera vez agrega también las dos plantillas PDF (personas y empresas): quedan guardadas en este navegador.</p>
-  <label id="zona">
-    <strong>Arrastra los archivos aquí</strong>
-    <span class="muted">o haz clic para elegirlos · .csv, .xlsx, .pdf</span>
-    <input id="input-archivos" type="file" multiple accept=".csv,.xlsx,.xlsm,.pdf" hidden>
-  </label>
-  <p id="cargando" hidden>⏳ Leyendo archivos… (los reportes de Niubiz son grandes, puede tardar un minuto)</p>
-  <div class="tabla-scroll" style="margin-top:14px;max-height:260px">
-    <table id="tabla-archivos"><thead><tr><th>Archivo</th><th>Reconocido como</th><th class="num">Filas</th><th class="num">Cobros exitosos</th><th>Nota</th></tr></thead><tbody></tbody></table>
-  </div>
-  <p id="resumen-archivos" class="muted"></p>
-  <details class="ajustes"><summary>Ajustes del período (normalmente no hace falta cambiarlos)</summary>
+<section class="paso" id="bienvenida" hidden>
+  <h2>Hola 👋</h2>
+  <p class="sub">Con esta herramienta preparas y envías los certificados de donación del año.<br>Para empezar, entra con tu cuenta de Crea+.</p>
+  <button class="grande" id="btn-entrar-grande">Entrar con mi cuenta de Crea+</button>
+  <p class="small muted" style="margin-top:22px">Usa tu correo @creamas.org. No necesitas instalar nada.</p>
+  <p id="link-local" hidden><button class="link" id="btn-modo-local">Trabajar sin conexión (solo TI)</button></p>
+</section>
+
+<nav id="pasos" hidden>
+  <button class="pbtn" data-p="1"><span class="n">1</span><span><b>Revisar archivos</b><small>¿Está todo?</small></span></button>
+  <button class="pbtn" data-p="2"><span class="n">2</span><span><b>Revisar donantes</b><small>Corrige y mira ejemplos</small></span></button>
+  <button class="pbtn" data-p="3"><span class="n">3</span><span><b>Crear certificados</b><small>Se guardan en SharePoint</small></span></button>
+  <button class="pbtn" data-p="4"><span class="n">4</span><span><b>Enviar</b><small>Primero una prueba</small></span></button>
+</nav>
+
+<section class="paso" id="paso1" hidden>
+  <h2>Revisa que esté todo</h2>
+  <p class="sub" id="ayuda-paso1">La app lee sola la carpeta <b>Certificados 2026</b> de SharePoint: reportes de pago, base de correos y plantillas.</p>
+  <p id="cargando" class="caja info" hidden>⏳ Leyendo la carpeta… Los reportes de Niubiz son grandes: puede tardar uno o dos minutos.</p>
+  <div id="cobertura"></div>
+  <ul class="lista-estado" id="estado-general"></ul>
+  <details class="mas" id="det-archivos"><summary>Ver los archivos leídos</summary>
+    <div class="tabla-scroll" style="max-height:280px">
+      <table id="tabla-archivos"><thead><tr><th>Archivo</th><th>Qué es</th><th class="num">Filas</th><th class="num">Pagos exitosos</th><th>Nota</th></tr></thead><tbody></tbody></table>
+    </div>
+    <p id="resumen-archivos" class="muted small"></p>
+  </details>
+  <details class="mas" id="det-zona"><summary>Agregar un archivo que no está en la carpeta</summary>
+    <label id="zona">
+      <strong>Arrastra los archivos aquí</strong>
+      <span class="muted">o haz clic para elegirlos · .csv, .xlsx, .pdf</span>
+      <input id="input-archivos" type="file" multiple accept=".csv,.xlsx,.xlsm,.pdf" hidden>
+    </label>
+    <p class="small muted">Lo ideal es guardar los reportes en la carpeta <b>01_REPORTES</b> para que queden para la próxima vez.</p>
+  </details>
+  <details class="mas"><summary>Opciones avanzadas</summary>
     <div class="fila">
       <div class="campo"><label for="p-desde">Pagos desde</label><input type="date" id="p-desde" value="2026-01-01"></div>
       <div class="campo"><label for="p-hasta">Pagos hasta</label><input type="date" id="p-hasta" value="2026-12-31"></div>
@@ -87,63 +161,110 @@ footer { text-align:center; color:var(--gris); font-size:12px; padding:20px; }
     </div>
     <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="p-docnombre" checked> Incluir el DNI/RUC en el nombre de cada PDF (como los certificados oficiales)</label>
   </details>
-  <div class="fila"><button id="btn-sp" class="grande" hidden>⟳ Actualizar desde SharePoint</button><button id="btn-revisar" class="grande" disabled>Revisar donantes →</button><button id="btn-reiniciar" class="sec">Empezar de nuevo</button></div>
+  <div class="acciones">
+    <button id="btn-sp" class="sec" hidden>⟳ Leer la carpeta otra vez</button>
+    <button id="btn-reiniciar" class="link">Empezar de nuevo</button>
+    <div class="der"><span class="motivo" id="motivo-1"></span><button id="btn-revisar" class="grande" disabled>Continuar →</button></div>
+  </div>
 </section>
 
 <section class="paso" id="paso2" hidden>
-  <h2><span class="n">2</span> Revisa la lista</h2>
-  <p class="ayuda">Cada fila es un donante con sus <b>cobros exitosos</b> del período (los rechazados y duplicados ya se quitaron). En <span class="estado REVISAR">Revisar</span> falta algo: corrige el nombre o el correo en la misma tabla, o desmarca la casilla para dejarlo fuera.</p>
-  <div id="contadores"></div>
+  <h2>Revisa a los donantes</h2>
+  <p class="sub">Cada persona aparece una sola vez, con todas sus donaciones exitosas del año. Solo tienes que mirar las que <b>necesitan tu ayuda</b>.</p>
+  <div class="metricas" id="contadores"></div>
+  <div id="ayuda-filtro" class="caja warn" hidden></div>
   <div class="fila">
     <div class="campo"><label for="filtro">Mostrar</label>
-      <select id="filtro" style="font:inherit;padding:8px;border-radius:8px;border:1px solid var(--borde)">
-        <option value="REVISAR">Para revisar</option><option value="LISTO">Listos</option><option value="EMITIDO">Ya emitidos</option><option value="EXCLUIDOS">Excluidos</option><option value="TODOS">Todos</option>
+      <select id="filtro">
+        <option value="REVISAR">Necesitan tu ayuda</option><option value="LISTO">Listos</option><option value="EMITIDO">Ya tienen certificado</option><option value="EXCLUIDOS">Dejados fuera</option><option value="TODOS">Todos</option>
       </select></div>
     <div class="campo"><label for="buscar">Buscar</label><input id="buscar" placeholder="Nombre, DNI o correo"></div>
   </div>
   <div class="tabla-scroll">
-    <table id="tabla-donantes"><thead><tr><th></th><th>Estado</th><th>Nombre</th><th>DNI / RUC</th><th>Correo</th><th class="num">Cobros</th><th class="num">Total</th><th>Detalle</th><th>Observaciones</th><th></th></tr></thead><tbody></tbody></table>
+    <table id="tabla-donantes"><thead><tr><th title="Incluir">Incluir</th><th>Estado</th><th>Nombre</th><th>DNI / RUC</th><th>Correo</th><th class="num">Pagos</th><th class="num">Total</th><th>Detalle</th><th>Qué falta</th><th></th></tr></thead><tbody></tbody></table>
   </div>
   <div id="paginas"></div>
   <div id="sin-doc" style="margin-top:12px"></div>
+  <div class="caja info" style="margin-top:22px">
+    <h3>Mira 3 certificados de ejemplo</h3>
+    <p>Abre tres certificados y revisa que el nombre, el DNI, los montos y los meses estén bien. Puedes usar el botón de abajo o <b>Ver PDF</b> en cualquier fila.</p>
+    <div class="puntos" id="estado-muestras"></div>
+    <button class="sec" id="btn-muestra">Ver un ejemplo</button>
+  </div>
+  <div class="acciones">
+    <button class="link" data-ir="1">← Atrás</button>
+    <div class="der"><span class="motivo" id="motivo-2"></span><button id="btn-a-paso3" class="grande" disabled>Continuar →</button></div>
+  </div>
 </section>
 
 <section class="paso" id="paso3" hidden>
-  <h2><span class="n">3</span> Genera los certificados</h2>
-  <p class="ayuda">Antes de generar, abre al menos <b>3 certificados de muestra</b> con el botón <b>Ver PDF</b> de la tabla y revisa nombre, DNI, montos y fecha.</p>
-  <div id="caja-plantillas" class="check" style="display:block">
-    <p id="estado-plantillas" style="margin:0 0 8px"></p>
-    <label class="sec" style="display:inline-block;cursor:pointer;border:1.5px solid var(--azul);color:var(--azul);background:#fff;border-radius:10px;padding:8px 14px;font-weight:600">
-      Cargar plantillas PDF<input id="input-plantillas" type="file" accept=".pdf" multiple hidden></label>
-    <span class="muted small">Archivos <b>plantilla_personas.pdf</b> y <b>plantilla_empresas.pdf</b>. Solo la primera vez: quedan guardados en este navegador.</span>
+  <h2>Crea los certificados</h2>
+  <p class="sub">Se crean con la plantilla oficial y se guardan en la carpeta <b>04_LOTES</b> de SharePoint. Todavía no se envía nada.</p>
+  <div id="form-crear">
+  <p class="grande-num" id="resumen-crear"></p>
+  <div id="caja-plantillas" class="caja mal" hidden>
+    <p id="estado-plantillas"></p>
+    <label class="sec" style="display:inline-block;cursor:pointer;margin-top:6px">Elegir plantillas PDF<input id="input-plantillas" type="file" accept=".pdf" multiple hidden></label>
+    <p class="small">Archivos <b>plantilla_personas.pdf</b> y <b>plantilla_empresas.pdf</b> de la carpeta 05_HERRAMIENTA.</p>
   </div>
-  <p id="estado-muestras" class="muted"></p>
-  <div class="fila">
-    <div class="campo"><label for="p-numero">Siguiente número libre (columna C de REPORTE)</label><input id="p-numero" placeholder="ej. 291"></div>
-    <div class="campo"><label for="p-emision">Fecha de emisión</label><input type="date" id="p-emision"></div>
+  <div class="tarjeta" style="margin:16px 0;padding:20px 22px">
+    <h3>Número del primer certificado</h3>
+    <div class="fila" style="align-items:center">
+      <span style="font-size:20px;font-weight:700;color:var(--gris)">002-000021,</span><input id="p-numero" inputmode="numeric" aria-label="Número del primer certificado">
+      <span class="muted" id="rango-numeros"></span>
+    </div>
+    <p class="small muted" id="origen-numero">La app propone el número siguiente al último que ella misma emitió.</p>
+    <div class="caja warn" style="margin-bottom:0">
+      <p><b>Antes de seguir, confírmalo en el Excel oficial.</b> Si alguien emitió certificados desde el Excel (por ejemplo, de empresas), el número pudo avanzar. Abre el Excel, ve a la hoja <b>REPORTE</b> y busca en la <b>columna C</b> el primer número que todavía no tiene nombre.</p>
+      <label class="check" style="background:#fff;margin-bottom:0"><input type="checkbox" id="confirmo-num"><span id="texto-confirmo-num">Revisé el Excel oficial y este número está libre.</span></label>
+    </div>
   </div>
-  <p id="rango-numeros" class="muted"></p>
-  <label class="check"><input type="checkbox" id="confirmo"><span>Revisé las muestras y confirmo que los datos son correctos. Entiendo que estos certificados son documentos oficiales de Crea+.</span></label>
-  <button id="btn-generar-sp" class="grande" disabled hidden>Generar y guardar en SharePoint</button> <button id="btn-generar" class="sec" disabled>Generar certificados (descargar ZIP)</button>
+  <details class="mas"><summary>Cambiar la fecha de emisión</summary>
+    <div class="campo"><label for="p-emision">Fecha de emisión que aparece en los certificados</label><input type="date" id="p-emision"></div>
+  </details>
+  <label class="check"><input type="checkbox" id="confirmo"><span>Revisé los ejemplos y los datos son correctos. Entiendo que estos certificados son documentos oficiales de Crea+.</span></label>
+  </div>
   <div id="progreso" hidden style="margin-top:14px"><progress id="barra" max="100" value="0"></progress><p id="progreso-texto"></p></div>
+  <div id="post-crear" class="caja ok" hidden>
+    <h3 id="post-crear-titulo">Certificados creados</h3>
+    <p><b>Último paso antes de enviar: anótalos en el Excel oficial</b>, para que nadie más use esos números.</p>
+    <ol>
+      <li>Pulsa <b>Descargar filas para el Excel</b>.</li>
+      <li>Abre el archivo descargado, selecciona todo (Ctrl+E) y copia (Ctrl+C).</li>
+      <li>En el Excel oficial, hoja <b>REPORTE</b>, haz clic en la <b>columna B</b> de la fila del número <b id="post-crear-num"></b> y pega (Ctrl+V).</li>
+    </ol>
+    <button class="sec" id="btn-descargar-filas">Descargar filas para el Excel</button>
+  </div>
+  <div class="acciones">
+    <button class="link" data-ir="2">← Atrás</button>
+    <div class="der"><span class="motivo" id="motivo-3"></span><button id="btn-generar" class="sec" disabled hidden>Crear y descargar ZIP</button><button id="btn-generar-sp" class="grande" disabled hidden>Crear certificados</button><button id="btn-a-paso4" class="grande" hidden>Ir a enviar →</button></div>
+  </div>
 </section>
 
-<section class="paso" id="paso4">
-  <h2><span class="n">4</span> Enviar por correo</h2>
+<section class="paso" id="paso4" hidden>
+  <h2>Envía los certificados</h2>
   <div id="paso4-sp" hidden>
-    <p class="ayuda">Cada lote guardado en SharePoint aparece aquí. El envío sale desde el buzón institucional, uno por uno, y queda anotado en <b>03_CONTROL/Registro certificados 2026.xlsx</b>. Si se interrumpe, vuelve a pulsar <b>Enviar</b>: solo se envían los pendientes.</p>
-    <label class="check"><input type="checkbox" id="modo-prueba" checked><span><b>Modo prueba</b>: todos los correos llegan a <b>tu</b> correo, no a los donantes. Desmárcalo solo para el envío real.</span></label>
-    <div id="lista-lotes" class="tabla-scroll" style="max-height:320px"></div>
-    <div id="envio-progreso" hidden style="margin-top:14px"><progress id="envio-barra" max="100" value="0"></progress><p id="envio-texto"></p></div>
+    <p class="sub">Los correos salen desde <b id="buzon-texto">amigos@creamas.org</b>, uno por uno. Si se corta la conexión o cierras la ventana, vuelve a entrar y pulsa <b>Enviar</b> otra vez: solo se envían los que faltan.</p>
+    <div id="lista-lotes"></div>
+    <div id="envio-progreso" class="caja info" hidden><progress id="envio-barra" max="100" value="0"></progress><p id="envio-texto"></p></div>
+    <div class="tarjeta" style="margin-top:22px">
+      <h3>¿Un donante dice que no le llegó?</h3>
+      <p class="muted small" style="margin-top:0">Búscalo por nombre o DNI y reenvíale su certificado. Si cambió de correo, corrígelo antes de reenviar.</p>
+      <div class="campo"><input id="buscar-reenvio" placeholder="Nombre o DNI" style="width:100%;max-width:420px"></div>
+      <div id="resultados-reenvio"></div>
+    </div>
   </div>
-  <ol class="instr" id="paso4-local">
-    <li>Se descarga un archivo <b>.zip</b>. Guárdalo completo en la carpeta privada de certificados en SharePoint.</li>
-    <li>Abre <b>filas_para_REPORTE.txt</b>, copia todo y pégalo en la hoja <b>REPORTE</b> del libro oficial, en la <b>columna B</b> de la fila del primer número usado.</li>
-    <li>El envío por correo se hace desde la carpeta de SharePoint (siguiente versión de esta herramienta).</li>
+  <ol id="paso4-local">
+    <li>Se descargó un archivo <b>.zip</b>. Guárdalo completo en la carpeta 04_LOTES de SharePoint.</li>
+    <li>Abre <b>filas_para_REPORTE.txt</b>, copia todo y pégalo en la hoja <b>REPORTE</b> del Excel oficial, columna B de la fila del primer número usado.</li>
+    <li>Para enviar por correo, entra con tu cuenta de Crea+.</li>
   </ol>
+  <div class="acciones"><button class="link" data-ir="3">← Atrás</button></div>
 </section>
-</main>
-<section class="paso" style="max-width:1280px;margin:0 auto 18px"><details><summary>Configuración (solo TI)</summary>
+
+<section class="paso" id="config-ti" hidden>
+  <h2 style="font-size:19px">Configuración (solo TI)</h2>
+  <p class="sub small">Esta sección solo aparece al abrir la app con <b>#ti</b> al final de la dirección.</p>
   <div class="fila">
     <div class="campo"><label for="cfg-clientId">Id. de aplicación (cliente)</label><input id="cfg-clientId" style="min-width:320px"></div>
     <div class="campo"><label for="cfg-tenantId">Id. de directorio (inquilino)</label><input id="cfg-tenantId" style="min-width:320px"></div>
@@ -157,10 +278,12 @@ footer { text-align:center; color:var(--gris); font-size:12px; padding:20px; }
   </div><button class="sec" id="cfg-guardar">Guardar configuración</button>
   <button class="sec" id="cfg-preparar">Crear o completar la carpeta en SharePoint</button>
   <p class="muted small">Crea la carpeta con sus subcarpetas (01_REPORTES … 06_MANUAL) y sube las plantillas cargadas en este navegador. No borra ni reemplaza nada.</p>
-  <p id="enlace-carpeta"></p></details></section>
-<footer>Crea+ · Certificados de donación · uso interno · contiene pdf-lib (MIT) y JSZip (MIT)</footer>
+  <p id="enlace-carpeta"></p>
+</section>
+</main>
+<p class="pie-ayuda">¿Dudas o algo no funciona? Escribe a <b>jcabrera@creamas.org</b> · Crea+ · uso interno · contiene pdf-lib (MIT) y JSZip (MIT)</p>
 <div id="avisos"></div>
-<div id="modal" hidden><div class="modal-caja"><header style="background:var(--azul);color:#fff;display:flex;justify-content:space-between;align-items:center"><b>Certificado de muestra</b><span><a class="sec" id="descargar-muestra" style="background:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;margin-right:8px">Descargar PDF</a><button class="sec" id="cerrar-modal" style="background:#fff">Cerrar</button></span></header><iframe id="visor" title="Vista previa del certificado"></iframe><div id="visor-alt" hidden style="padding:32px;text-align:center"><p>Este navegador no puede mostrar el PDF dentro de la página.</p><p>Pulsa <b>Descargar PDF</b> (arriba) y ábrelo para revisarlo. En una computadora con Edge o Chrome se ve aquí mismo.</p></div></div></div>
+<div id="modal" hidden><div class="modal-caja"><header><b>Certificado de ejemplo</b><span><a class="sec" id="descargar-muestra" style="margin-right:8px">Descargar PDF</a><button class="sec" id="cerrar-modal">Cerrar</button></span></header><iframe id="visor" title="Vista previa del certificado"></iframe><div id="visor-alt" hidden style="padding:32px;text-align:center"><p>Este navegador no puede mostrar el PDF dentro de la página.</p><p>Pulsa <b>Descargar PDF</b> (arriba) y ábrelo para revisarlo. En una computadora con Edge o Chrome se ve aquí mismo.</p></div></div></div>
 <script>!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t=t||self).PDFLib={})}(this,(function(t){"use strict";
 /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -699,9 +822,12 @@ function filtrados() {
 function pintarRevision() {
   const c = { LISTO: 0, REVISAR: 0, EMITIDO: 0 }; let excl = 0, totalListo = 0;
   for (const d of S.donantes) { if (!d.incluir) excl++; else { c[d.estado]++; if (d.estado === 'LISTO') totalListo += d.total; } }
-  $('#contadores').innerHTML = `<span class="chip ok">Listos: ${c.LISTO}</span><span class="chip warn">Para revisar: ${c.REVISAR}</span>
-    <span class="chip">Ya emitidos: ${c.EMITIDO}</span><span class="chip">Excluidos: ${excl}</span><span class="chip">Monto total listo: ${soles(totalListo)}</span>
-    ${S.sinDoc.length ? `<span class="chip warn">Pagos sin DNI: ${S.sinDoc.length}</span>` : ''}`;
+  const f = $('#filtro').value;
+  const tarj = (val, n, txt, cls) => `<button class="metrica ${cls} ${f === val ? 'sel' : ''}" data-f="${val}"><b>${n.toLocaleString('es-PE')}</b><span>${txt}</span></button>`;
+  $('#contadores').innerHTML = tarj('LISTO', c.LISTO, `listos · ${soles(totalListo)}`, 'ok') + tarj('REVISAR', c.REVISAR, 'necesitan tu ayuda', c.REVISAR ? 'warn' : '') +
+    tarj('EMITIDO', c.EMITIDO, 'ya tienen certificado', '') + tarj('EXCLUIDOS', excl, 'dejados fuera', '');
+  $('#ayuda-filtro').hidden = !(f === 'REVISAR' && c.REVISAR);
+  $('#ayuda-filtro').innerHTML = 'A estas personas les falta algo (lo dice la columna <b>Qué falta</b>). Corrígelo en la misma fila (por ejemplo, escribe el correo) y pasarán a <b>Listos</b>. Si no puedes resolverlo, desmarca <b>Incluir</b>: no recibirán certificado por ahora.';
   const lista = filtrados();
   const POR = 50; const pags = Math.max(1, Math.ceil(lista.length / POR));
   S.pagina = Math.min(S.pagina, pags - 1);
@@ -713,13 +839,13 @@ function pintarRevision() {
       : `<input data-i="${i}" class="ed-correo" value="${esc(d.correo)}" placeholder="correo@ejemplo.com">`;
     return `<tr class="${!d.incluir ? 'excluido' : d.estado === 'LISTO' ? 'listo' : 'revisar'}">
       <td><input type="checkbox" data-i="${i}" class="ed-incluir" ${d.incluir ? 'checked' : ''} title="Incluir"></td>
-      <td><span class="estado ${d.estado}">${d.estado === 'LISTO' ? 'Listo' : d.estado === 'EMITIDO' ? 'Ya emitido' : 'Revisar'}</span></td>
+      <td><span class="estado ${d.estado}">${d.estado === 'LISTO' ? 'Listo' : d.estado === 'EMITIDO' ? 'Ya tiene' : 'Falta algo'}</span></td>
       <td><input data-i="${i}" class="ed-nombre" value="${esc(d.nombre)}"></td>
       <td>${esc(d.doc)}</td><td>${correoCampo}</td>
       <td class="num">${d.pagos.length}</td><td class="num">${soles(d.total)}</td>
-      <td class="small">${d.lineas.map((l) => `${l.cantidad} × ${soles(l.valor)}`).join('<br>')}<br><span class="muted">${esc(d.plataformas)}</span></td>
+      <td class="small" style="white-space:nowrap">${d.lineas.map((l) => `${l.cantidad} × ${soles(l.valor)}`).join('<br>')}<br><span class="muted">${esc(d.plataformas)}</span></td>
       <td class="small">${d.tipo === 'empresas' ? `<input data-i="${i}" class="ed-dir" value="${esc(d.direccion)}" placeholder="Dirección de la empresa"><br>` : ''}${d.obs.map(esc).join('<br>')}${d.nota ? `<br><span class="muted">${esc(d.nota)}</span>` : ''}</td>
-      <td><button class="sec ver" data-i="${i}">Ver PDF</button></td></tr>`;
+      <td><button class="sec ver" data-i="${i}" style="padding:5px 10px">Ver PDF</button></td></tr>`;
   }).join('') || '<tr><td colspan="10" class="muted">No hay registros con este filtro.</td></tr>';
   $('#paginas').innerHTML = pags > 1 ? Array.from({ length: pags }, (_, k) => `<button class="pag ${k === S.pagina ? 'act' : ''}" data-p="${k}">${k + 1}</button>`).join('') : '';
   $('#sin-doc').innerHTML = S.sinDoc.length ? `<details><summary>${S.sinDoc.length} pagos exitosos no tienen DNI y no se pudieron asignar a nadie (no se incluyen)</summary>
@@ -732,16 +858,22 @@ function actualizarPaso3() {
   const plantillasOk = S.plantillas.personas && (S.plantillas.empresas || !S.donantes.some((d) => d.incluir && d.estado === 'LISTO' && d.tipo === 'empresas'));
   const sig = siguienteNumero();
   const muestras = S.muestrasVistas.size;
-  $('#estado-plantillas').innerHTML = `<b>Plantillas:</b> personas ${S.plantillas.personas ? '✅ cargada' : '❌ falta'} · empresas ${S.plantillas.empresas ? '✅ cargada' : '— (solo si hay empresas)'}`;
-  $('#caja-plantillas').classList.toggle('falta', !S.plantillas.personas);
-  $('#estado-muestras').textContent = `Certificados de muestra revisados: ${muestras} de 3`;
-  const ok = listos > 0 && plantillasOk && sig !== null && muestras >= 3 && $('#confirmo').checked;
+  $('#estado-muestras').innerHTML = [0, 1, 2].map((k) => `<span class="punto ${k < muestras ? 'ok' : ''}">${k < muestras ? '✓' : k + 1}</span>`).join('') + `<span class="muted small" style="margin-left:6px">${Math.min(muestras, 3)} de 3 ejemplos vistos</span>`;
+  const numOk = $('#confirmo-num').checked;
+  const ok = listos > 0 && plantillasOk && sig !== null && muestras >= 3 && numOk && $('#confirmo').checked;
   $('#btn-generar').disabled = !ok;
-  $('#btn-generar').textContent = listos ? `Generar ${listos} certificados (descargar ZIP)` : 'Generar certificados (descargar ZIP)';
+  $('#btn-generar').textContent = listos ? `Crear ${listos} y descargar ZIP` : 'Crear y descargar ZIP';
   const sp = $('#btn-generar-sp');
-  if (sp) { sp.disabled = !ok; sp.textContent = listos ? `Generar ${listos} certificados y guardarlos en SharePoint` : 'Generar y guardar en SharePoint'; }
-  if (sig !== null && listos) $('#rango-numeros').textContent = `Se usarán los números ${SERIE}${sig} a ${SERIE}${sig + listos - 1}.`;
+  if (sp) { sp.disabled = !ok; sp.textContent = listos ? `Crear ${listos.toLocaleString('es-PE')} certificados` : 'Crear certificados'; }
+  $('#caja-plantillas').hidden = !!plantillasOk;
+  $('#estado-plantillas').innerHTML = `<b>Falta la plantilla de ${S.plantillas.personas ? 'empresas' : 'personas'}.</b> Normalmente se lee sola de la carpeta 05_HERRAMIENTA; si no está ahí, elígela aquí.`;
+  $('#resumen-crear').innerHTML = listos ? `Se crearán <b>${listos.toLocaleString('es-PE')} certificados</b>${sig !== null ? `, del N.º <b>${sig}</b> al <b>${sig + listos - 1}</b>` : ''}.` : 'No hay donantes listos. Vuelve al paso 2.';
+  if (sig !== null && listos) $('#rango-numeros').textContent = `→ hasta el ${SERIE}${sig + listos - 1}`;
   else $('#rango-numeros').textContent = '';
+  $('#texto-confirmo-num').innerHTML = sig !== null ? `Revisé el Excel oficial: el N.º <b>${SERIE}${sig}</b> está libre (no tiene nombre en la hoja REPORTE).` : 'Escribe arriba el número del primer certificado.';
+  const motivo = !listos ? 'No hay donantes listos.' : !plantillasOk ? 'Falta una plantilla.' : sig === null ? 'Falta el número del primer certificado.' : muestras < 3 ? `Faltan ${3 - muestras} ejemplos por mirar (paso 2).` : !numOk ? 'Confirma el número en el Excel.' : !$('#confirmo').checked ? 'Marca la casilla de confirmación.' : '';
+  $('#motivo-3').textContent = motivo;
+  if (typeof uxActualizar === 'function') uxActualizar();
 }
 
 function siguienteNumero() {
@@ -759,8 +891,7 @@ async function plantillaDe(tipo) {
 async function verMuestra(i) {
   const d = S.donantes[i];
   if (!S.plantillas[d.tipo]) {
-    aviso(`Primero carga la plantilla de ${d.tipo} (archivo plantilla_${d.tipo}.pdf) con el botón "Cargar plantillas PDF" del paso 3.`, 'warn');
-    $('#caja-plantillas').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    aviso(`Falta la plantilla de ${d.tipo} (plantilla_${d.tipo}.pdf). Debe estar en la carpeta 05_HERRAMIENTA de SharePoint.`, 'warn');
     return;
   }
   try {
@@ -832,7 +963,7 @@ async function prepararLote() {
 /* Después de generar: bloquear a esos donantes y avanzar la numeración. */
 function cerrarLote(L) {
   L.listos.forEach((d, k) => { d.emitido = SERIE + (L.n + k); S.emitidos.set(d.doc, d.emitido); d.incluir = false; validar(d); });
-  $('#confirmo').checked = false;
+  $('#confirmo').checked = false; $('#confirmo-num').checked = false;
   S.muestrasVistas.clear();
   $('#p-numero').value = String(L.n + L.listos.length);
   guardarAjustes();
@@ -853,6 +984,7 @@ async function generar() {
   document.body.appendChild(a); a.click(); a.remove();
   $('#progreso-texto').textContent = `Listo: ${L.listos.length} certificados generados. Se descargó el archivo ${a.download}.`;
   cerrarLote(L);
+  irA(4);
   aviso(`Se generaron ${L.listos.length} certificados. El siguiente número disponible ahora es ${SERIE}${L.n + L.listos.length}.`, 'ok');
 }
 
@@ -895,11 +1027,10 @@ async function iniciar() {
         if (/\.pdf$/i.test(f.name)) {
           const tipo = /empresa/i.test(f.name) ? 'empresas' : 'personas';
           await cargarPlantilla(f, tipo);
-          aviso(`Plantilla de ${tipo} cargada (${f.name}).`, 'ok');
           continue;
         }
         const info = await cargarArchivo(f);
-        aviso(`${f.name}: ${info.tipoTexto}${info.tipo === 'DESCONOCIDO' ? ' — no se usó' : ''}.`, info.tipo === 'DESCONOCIDO' ? 'error' : 'ok');
+        if (info.tipo === 'DESCONOCIDO') aviso(`${f.name}: no se reconoció este archivo y no se usa.`, 'error');
       } catch (e) { aviso(`${f.name}: no se pudo leer (${e.message}).`, 'error'); }
     }
     $('#cargando').hidden = true;
@@ -912,12 +1043,13 @@ async function iniciar() {
   $('#input-archivos').addEventListener('change', (e) => { recibir([...e.target.files]); e.target.value = ''; });
 
   $('#btn-revisar').addEventListener('click', () => {
-    const { fueraPeriodo } = consolidar();
-    $('#paso2').hidden = false; $('#paso3').hidden = false;
+    consolidar();
+    $('#filtro').value = S.donantes.some((d) => d.incluir && d.estado === 'REVISAR') ? 'REVISAR' : 'LISTO';
+    S.pagina = 0;
     pintarRevision();
-    aviso(`Revisión lista: ${S.donantes.length} donantes con pagos exitosos en el período. Pagos fuera del período: ${fueraPeriodo}.`, 'ok');
-    $('#paso2').scrollIntoView({ behavior: 'smooth' });
+    irA(2);
   });
+  $('#contadores').addEventListener('click', (e) => { const b = e.target.closest('[data-f]'); if (b) { $('#filtro').value = b.dataset.f; S.pagina = 0; pintarRevision(); } });
   $('#btn-reiniciar').addEventListener('click', () => { if (confirm('¿Borrar todos los archivos cargados y empezar de nuevo? (las plantillas y ajustes se conservan)')) location.reload(); });
   for (const id of ['filtro', 'buscar']) $('#' + id).addEventListener('input', () => { S.pagina = 0; pintarRevision(); });
   $('#paginas').addEventListener('click', (e) => { if (e.target.dataset.p) { S.pagina = +e.target.dataset.p; pintarRevision(); } });
@@ -937,6 +1069,8 @@ async function iniciar() {
     if (S.donantes.length && ['p-desde', 'p-hasta'].includes(id)) { consolidar(); pintarRevision(); } else actualizarPaso3();
   });
   $('#confirmo').addEventListener('change', actualizarPaso3);
+  $('#confirmo-num').addEventListener('change', actualizarPaso3);
+  $('#p-numero').addEventListener('input', () => { $('#confirmo-num').checked = false; actualizarPaso3(); });
   $('#input-plantillas').addEventListener('change', async (e) => {
     for (const f of e.target.files) {
       try {
@@ -974,7 +1108,6 @@ const REG_COLS = ['fecha_registro', 'lote', 'numero_certificado', 'documento', '
 const REGISTRO_PLANTILLA_B64 = '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';
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 
-let S_AYUDA_LOCAL = '';
 const M = { cfg: { ...CFG_DEFECTO }, token: null, yo: null, siteId: null, driveBase: null, lotes: [], registro: null, enviando: false };
 
 function cargarCfg() {
@@ -1113,16 +1246,18 @@ async function abrirRegistro() {
   const base = `${M.driveBase}/items/${item.id}/workbook/tables/Envios`;
   const filas = (await graph('GET', `${base}/rows`)).value || [];
   const porNumero = new Map();
+  const pruebaLotes = new Set();
   for (const f of filas) {
     const v = f.values[0];
     const reg = Object.fromEntries(REG_COLS.map((c, i) => [c, v[i]]));
     if (!reg.numero_certificado) continue;
+    if (reg.estado === 'PRUEBA_ENVIADA') pruebaLotes.add(reg.lote);
     const previo = porNumero.get(reg.numero_certificado);
     // Prevalece el estado más avanzado: ENVIADO > ENVIANDO > ERROR > PRUEBA
-    const rango = { ENVIADO: 4, ENVIANDO: 3, ERROR: 2, PRUEBA_ENVIADA: 1 };
+    const rango = { REENVIADO: 5, ENVIADO: 4, ENVIANDO: 3, ERROR: 2, PRUEBA_ENVIADA: 1 };
     if (!previo || (rango[reg.estado] || 0) >= (rango[previo.estado] || 0)) porNumero.set(reg.numero_certificado, { ...reg, index: f.index });
   }
-  M.registro = { base, porNumero };
+  M.registro = { base, porNumero, pruebaLotes };
   return M.registro;
 }
 async function registrar(valores) {
@@ -1164,7 +1299,10 @@ async function prepararCarpeta() {
 
 /* ------------------------------------------------------------ actualizar desde SharePoint */
 async function actualizarDesdeSharePoint() {
+  if (M.leyendo) return;
+  M.leyendo = true;
   $('#cargando').hidden = false;
+  $('#estado-general').innerHTML = '';
   try {
     await sitio();
     const grupos = [RUTAS.reportes, RUTAS.base, RUTAS.control, RUTAS.herramienta];
@@ -1184,10 +1322,11 @@ async function actualizarDesdeSharePoint() {
     }
     await leerLotes();
     await abrirRegistro();
-    aviso(`Se leyeron ${n} archivos desde SharePoint y ${M.lotes.length} lote(s) anteriores.`, 'ok');
+    M.leido = true;
   } catch (e) {
-    aviso('No se pudo leer SharePoint: ' + e.message, 'error');
+    aviso('No se pudo leer la carpeta de SharePoint: ' + e.message + ' Revisa tu conexión y pulsa "Leer la carpeta otra vez".', 'error');
   }
+  M.leyendo = false;
   $('#cargando').hidden = true;
   if (S.maxEmitido && !$('#p-numero').value) $('#p-numero').value = String(S.maxEmitido + 1);
   pintarArchivos(); actualizarPaso3(); pintarLotes();
@@ -1231,9 +1370,11 @@ async function generarEnSharePoint() {
   await leerLotes();
   if (!M.registro) await abrirRegistro();
   pintarLotes();
-  $('#progreso-texto').textContent = `Listo: ${L.listos.length} certificados guardados en ${M.cfg.carpeta}/${rel}. Ahora puedes enviarlos en el paso 4.`;
-  aviso(`Lote ${L.nombreLote} guardado en SharePoint. Siguiente número: ${SERIE}${L.n + L.listos.length}.`, 'ok');
-  $('#paso4').scrollIntoView({ behavior: 'smooth' });
+  $('#progreso').hidden = true;
+  M.ultimoLote = L;
+  $('#post-crear-titulo').textContent = `Listo: ${L.listos.length.toLocaleString('es-PE')} certificados creados (N.º ${L.n} al ${L.n + L.listos.length - 1})`;
+  $('#post-crear-num').textContent = SERIE + L.n;
+  $('#post-crear').hidden = false;
 }
 
 /* ------------------------------------------------------------ envío */
@@ -1242,7 +1383,7 @@ function pendientesDe(lote) {
   const pend = [], inciertos = [], enviados = [];
   for (const f of lote.filas) {
     const r = reg.get(f.numero_certificado);
-    if (r && r.estado === 'ENVIADO') enviados.push(f);
+    if (r && (r.estado === 'ENVIADO' || r.estado === 'REENVIADO')) enviados.push(f);
     else if (r && r.estado === 'ENVIANDO') inciertos.push(f);
     else pend.push(f);
   }
@@ -1262,17 +1403,19 @@ function cuerpoCorreo(f) {
 <p>Con gratitud,<br><b>Equipo Crea+</b></p></div>`;
 }
 
-async function enviarLote(nombreLote) {
+const PRUEBA_MAX = 3;
+async function enviarLote(nombreLote, prueba) {
   if (M.enviando) return;
   const lote = M.lotes.find((l) => l.nombre === nombreLote);
-  const prueba = $('#modo-prueba').checked;
   await abrirRegistro();
-  const { pend, inciertos } = pendientesDe(lote);
-  if (!pend.length) { aviso('Este lote no tiene certificados pendientes de envío.', 'info'); return; }
+  let { pend, inciertos } = pendientesDe(lote);
+  if (!pend.length) { aviso('Ya se enviaron todos los certificados de este grupo.', 'info'); return; }
   const destinoPrueba = M.yo && (M.yo.mail || M.yo.userPrincipalName);
+  if (prueba) pend = pend.slice(0, PRUEBA_MAX);
+  const minutos = Math.max(1, Math.round((pend.length * (M.cfg.pausaMs + 1500)) / 60000));
   const msg = prueba
-    ? `MODO PRUEBA: se enviarán ${pend.length} correos a TU correo (${destinoPrueba}), no a los donantes.`
-    : `Se enviarán ${pend.length} certificados a los donantes desde ${M.cfg.buzon}.\n\nEsto no se puede deshacer. ¿Continuar?`;
+    ? `Se enviarán ${pend.length} correos de PRUEBA a tu correo (${destinoPrueba}). Los donantes no reciben nada.`
+    : `Vas a enviar ${pend.length} certificados a los DONANTES desde ${M.cfg.buzon}.\n\nTardará unos ${minutos} minutos. Una vez enviados, no se pueden recuperar.\n\n¿Enviar ahora?`;
   if (!confirm(msg)) return;
   M.enviando = true;
   const t = { ok: 0, error: 0 };
@@ -1309,39 +1452,113 @@ async function enviarLote(nombreLote) {
       aviso(`${f.numero_certificado}: no se envió (${e.message}).`, 'error');
     }
     $('#envio-barra').value = Math.round(((k + 1) / pend.length) * 100);
-    $('#envio-texto').textContent = `Enviando ${k + 1} de ${pend.length}… (enviados: ${t.ok}, con error: ${t.error}). No cierres esta pestaña.`;
+    const resta = Math.max(0, Math.round(((pend.length - k - 1) * (M.cfg.pausaMs + 1500)) / 60000));
+    $('#envio-texto').textContent = `Enviando ${k + 1} de ${pend.length}… (enviados: ${t.ok}${t.error ? `, con problema: ${t.error}` : ''}). ${resta ? `Faltan unos ${resta} min. ` : ''}No cierres esta pestaña.`;
     if (k < pend.length - 1) await new Promise((ok) => setTimeout(ok, M.cfg.pausaMs));
   }
   M.enviando = false;
   await abrirRegistro();
   pintarLotes();
-  $('#envio-texto').textContent = `Terminado${prueba ? ' (modo prueba)' : ''}: ${t.ok} enviados, ${t.error} con error${inciertos.length ? `, ${inciertos.length} quedaron en duda de un envío anterior (revisar Elementos enviados)` : ''}.`;
-  aviso(`Envío terminado: ${t.ok} enviados, ${t.error} con error.`, t.error ? 'warn' : 'ok');
+  $('#envio-texto').textContent = prueba
+    ? `Terminado (prueba): se enviaron ${t.ok} correos a ${destinoPrueba}. Revisa tu bandeja: que el PDF se abra y que los datos estén bien.`
+    : `Terminado: ${t.ok} enviados${t.error ? `, ${t.error} con problema (normalmente un correo mal escrito: búscalos abajo en "¿Un donante dice que no le llegó?", corrige el correo y reenvía)` : ''}${inciertos.length ? `. ${inciertos.length} quedaron en duda de un envío anterior: revisa Elementos enviados de ${M.cfg.buzon}` : ''}.`;
+  aviso(prueba ? 'Prueba enviada a tu correo.' : `Envío terminado: ${t.ok} enviados${t.error ? `, ${t.error} con problema` : ''}.`, t.error ? 'warn' : 'ok');
+}
+
+/* ------------------------------------------------------------ reenviar a un donante */
+async function reenviar(nombreLote, numero, correo) {
+  if (M.enviando) return;
+  const lote = M.lotes.find((l) => l.nombre === nombreLote);
+  const f = lote && lote.filas.find((x) => x.numero_certificado === numero);
+  if (!f) throw new Error('No se encontró ese certificado.');
+  correo = limpiar(correo).toLowerCase();
+  if (!correoValido(correo)) { aviso('Ese correo no parece válido. Revísalo.', 'warn'); return; }
+  if (!confirm(`Se reenviará el certificado N.º ${numero} de ${f.nombre} a ${correo}. ¿Continuar?`)) return;
+  M.enviando = true;
+  try {
+    await abrirRegistro();
+    const it = lote.pdfs.get(f.archivo);
+    if (!it) throw new Error('No se encontró el PDF en SharePoint');
+    const bytes = await descargar(it);
+    await graph('POST', `/users/${encodeURIComponent(M.cfg.buzon)}/sendMail`, {
+      message: {
+        subject: `Crea+ | Tu certificado de donación ${(f.periodo_desde || '2026').slice(0, 4)} N.º ${f.numero_certificado}`,
+        body: { contentType: 'HTML', content: cuerpoCorreo(f) },
+        toRecipients: [{ emailAddress: { address: correo } }],
+        attachments: [{ '@odata.type': '#microsoft.graph.fileAttachment', name: f.archivo, contentType: 'application/pdf', contentBytes: b64(bytes) }],
+      },
+      saveToSentItems: true,
+    });
+    await registrar({ fecha_registro: new Date().toISOString(), lote: lote.nombre, numero_certificado: f.numero_certificado, documento: f.documento, nombre: f.nombre, correo, monto_total: f.monto_total, archivo: f.archivo, estado: 'REENVIADO', fecha_envio: new Date().toISOString(), detalle: correo !== f.correo ? 'correo corregido (antes ' + f.correo + ')' : '' });
+    f.correo = correo;
+    await abrirRegistro();
+    aviso(`Certificado reenviado a ${correo}.`, 'ok');
+  } finally { M.enviando = false; }
+  pintarLotes(); pintarReenvio();
+}
+
+function pintarReenvio() {
+  const caja = $('#resultados-reenvio'); if (!caja) return;
+  const q = sinTildes($('#buscar-reenvio').value);
+  if (q.length < 3) { caja.innerHTML = ''; return; }
+  const res = [];
+  for (const l of M.lotes) for (const f of l.filas) if (sinTildes(f.nombre + ' ' + f.documento).includes(q)) res.push({ l, f });
+  if (!res.length) { caja.innerHTML = '<p class="muted">No hay certificados emitidos para esa búsqueda.</p>'; return; }
+  const reg = M.registro ? M.registro.porNumero : new Map();
+  const est = { ENVIADO: 'Enviado', REENVIADO: 'Reenviado', ERROR: 'No se pudo enviar', ENVIANDO: 'En duda', PRUEBA_ENVIADA: 'Sin enviar' };
+  caja.innerHTML = `<table style="margin-top:10px"><thead><tr><th>Nombre</th><th>DNI</th><th>N.º</th><th>Estado</th><th>Correo</th><th></th></tr></thead><tbody>${res.slice(0, 20).map(({ l, f }, k) => {
+    const r = reg.get(f.numero_certificado);
+    return `<tr><td>${esc(f.nombre)}</td><td>${esc(f.documento)}</td><td>${esc(f.numero_certificado.slice(SERIE.length))}</td><td>${esc(r ? est[r.estado] || r.estado : 'Sin enviar')}</td>
+      <td><input class="correo-reenvio" data-k="${k}" value="${esc(f.correo)}"></td><td><button class="sec btn-reenviar" data-k="${k}" data-l="${esc(l.nombre)}" data-n="${esc(f.numero_certificado)}">Reenviar</button></td></tr>`;
+  }).join('')}</tbody></table>`;
 }
 
 /* ------------------------------------------------------------ interfaz */
 function pintarSesion() {
   const dentro = !!M.token;
   $('#sesion').innerHTML = dentro
-    ? `<span>👤 ${esc((M.yo && (M.yo.displayName || M.yo.mail)) || 'Sesión iniciada')}</span> <button class="sec" id="btn-salir" style="background:#fff">Salir</button>`
-    : `<button id="btn-entrar" class="sec" style="background:#fff">Iniciar sesión con Microsoft</button>`;
-  if (dentro) $('#btn-salir').onclick = cerrarSesion; else $('#btn-entrar').onclick = iniciarSesion;
+    ? `<span>👤 ${esc((M.yo && (M.yo.displayName || M.yo.mail)) || 'Sesión iniciada')}</span> <button id="btn-salir">Salir</button>`
+    : '';
+  if (dentro) $('#btn-salir').onclick = cerrarSesion;
   $('#btn-sp').hidden = !dentro;
   $('#btn-generar-sp').hidden = !dentro;
+  $('#btn-generar').hidden = dentro;
   $('#paso4-sp').hidden = !dentro;
   $('#paso4-local').hidden = dentro;
+  $('#buzon-texto').textContent = M.cfg.buzon;
   $('#ayuda-paso1').innerHTML = dentro
-    ? 'Pulsa <b>⟳ Actualizar desde SharePoint</b>: la app lee sola los reportes, la base de donantes, el registro y las plantillas de la carpeta <b>' + esc(M.cfg.carpeta) + '</b>. Si tienes algún archivo extra, también puedes arrastrarlo aquí.'
-    : S_AYUDA_LOCAL;
+    ? 'La app lee sola la carpeta <b>' + esc(M.cfg.carpeta) + '</b> de SharePoint: reportes de pago, base de correos, certificados ya emitidos y plantillas.'
+    : 'Modo sin conexión: arrastra los reportes, la base de donantes y las plantillas en <b>Agregar un archivo</b>.';
+  if (typeof uxSesion === 'function') uxSesion(dentro);
+}
+
+function rangoLote(l) {
+  const m = /^lote_(\d{4})(\d{2})(\d{2})\d{4}_(\d+)-(\d+)$/.exec(l.nombre);
+  return m ? { desde: m[4], hasta: m[5], fecha: `${m[3]}/${m[2]}/${m[1]}` } : { desde: '', hasta: '', fecha: '' };
 }
 
 function pintarLotes() {
   const caja = $('#lista-lotes');
   if (!caja) return;
-  if (!M.lotes.length) { caja.innerHTML = '<p class="muted">Todavía no hay lotes guardados en SharePoint.</p>'; return; }
-  caja.innerHTML = `<table><thead><tr><th>Lote</th><th class="num">Certificados</th><th class="num">Enviados</th><th class="num">Pendientes</th><th class="num">En duda</th><th></th></tr></thead><tbody>${
-    M.lotes.map((l) => { const p = pendientesDe(l); return `<tr><td>${esc(l.nombre)}</td><td class="num">${l.filas.length}</td><td class="num">${p.enviados.length}</td><td class="num">${p.pend.length}</td><td class="num">${p.inciertos.length}</td>
-      <td>${p.pend.length ? `<button class="enviar-lote" data-l="${esc(l.nombre)}">Enviar ${p.pend.length}</button>` : '✅ completo'}</td></tr>`; }).join('')}</tbody></table>`;
+  if (!M.lotes.length) { caja.innerHTML = '<p class="caja info">Todavía no hay certificados creados. Créalos en el paso 3.</p>'; return; }
+  const pruebas = M.registro ? M.registro.pruebaLotes : new Set();
+  const orden = [...M.lotes].sort((a, b) => pendientesDe(b).pend.length - pendientesDe(a).pend.length || b.nombre.localeCompare(a.nombre));
+  caja.innerHTML = orden.map((l) => {
+    const p = pendientesDe(l); const r = rangoLote(l);
+    const probado = pruebas.has(l.nombre) || M.probados.has(l.nombre);
+    const titulo = `<h3>Certificados N.º ${r.desde} al ${r.hasta}</h3><p class="muted small" style="margin:0">${l.filas.length.toLocaleString('es-PE')} certificados · creados el ${r.fecha}</p>`;
+    if (!p.pend.length) {
+      return `<div class="lote">${titulo}<p class="caja ok" style="margin-bottom:0">✓ Todos enviados (${p.enviados.length.toLocaleString('es-PE')}).${p.inciertos.length ? ` ${p.inciertos.length} en duda: revisa Elementos enviados.` : ''}</p></div>`;
+    }
+    return `<div class="lote">${titulo}
+      <p style="margin:10px 0 0"><b>${p.enviados.length.toLocaleString('es-PE')}</b> enviados · <b>${p.pend.length.toLocaleString('es-PE')}</b> por enviar${p.inciertos.length ? ` · <b>${p.inciertos.length}</b> en duda` : ''}</p>
+      <div class="etapas">
+        <div class="etapa ${probado ? 'hecha' : ''}"><h4>${probado ? '✓ ' : ''}a) Envíate una prueba</h4><p>Te llegan ${Math.min(PRUEBA_MAX, p.pend.length)} correos de ejemplo a ti. Revisa que el PDF se abra y que todo esté bien.</p>
+          <button class="sec enviar-prueba" data-l="${esc(l.nombre)}">Enviarme ${Math.min(PRUEBA_MAX, p.pend.length)} de prueba</button></div>
+        <div class="etapa"><h4>b) Envía a los donantes</h4><p>${probado ? 'Cuando hayas revisado la prueba en tu correo.' : 'Se activa después de la prueba.'}</p>
+          <button class="enviar-lote" data-l="${esc(l.nombre)}" ${probado ? '' : 'disabled'}>Enviar a ${p.pend.length.toLocaleString('es-PE')} donantes</button></div>
+      </div></div>`;
+  }).join('');
 }
 
 function pintarCfg() {
@@ -1349,33 +1566,188 @@ function pintarCfg() {
 }
 
 async function iniciarM365() {
-  S_AYUDA_LOCAL = $('#ayuda-paso1').innerHTML;
+  M.probados = new Set();
   cargarCfg(); pintarCfg();
   $('#cfg-guardar').addEventListener('click', () => {
     for (const k of Object.keys(CFG_DEFECTO)) { const el = $('#cfg-' + k); if (el) M.cfg[k] = k === 'pausaMs' ? Math.max(2000, +el.value || 2500) : el.value.trim(); }
     guardarCfg(); M.siteId = null; M.driveBase = null; aviso('Configuración guardada.', 'ok');
   });
   $('#btn-sp').addEventListener('click', actualizarDesdeSharePoint);
+  $('#btn-entrar-grande').addEventListener('click', iniciarSesion);
   $('#cfg-preparar').addEventListener('click', async () => {
     try { await prepararCarpeta(); } catch (e) { aviso('No se pudo preparar la carpeta: ' + e.message, 'error'); }
   });
   $('#btn-generar-sp').addEventListener('click', async () => {
     $('#btn-generar-sp').disabled = true;
-    try { await generarEnSharePoint(); } catch (e) { aviso('Error al guardar en SharePoint: ' + e.message, 'error'); }
+    try { await generarEnSharePoint(); } catch (e) { aviso('No se pudieron guardar los certificados en SharePoint: ' + e.message, 'error'); }
     actualizarPaso3();
   });
+  $('#btn-descargar-filas').addEventListener('click', () => {
+    const L = M.ultimoLote; if (!L) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([L.control['filas_para_REPORTE.txt']], { type: 'text/plain;charset=utf-8' }));
+    a.download = `filas para el Excel - N ${L.n} al ${L.n + L.listos.length - 1}.txt`;
+    document.body.appendChild(a); a.click(); a.remove();
+  });
   $('#lista-lotes').addEventListener('click', async (e) => {
-    if (!e.target.classList.contains('enviar-lote')) return;
-    e.target.disabled = true;
-    try { await enviarLote(e.target.dataset.l); } catch (err) { M.enviando = false; aviso('Error en el envío: ' + err.message, 'error'); }
+    const b = e.target.closest('.enviar-lote, .enviar-prueba'); if (!b) return;
+    const prueba = b.classList.contains('enviar-prueba');
+    b.disabled = true;
+    try { await enviarLote(b.dataset.l, prueba); if (prueba) M.probados.add(b.dataset.l); } catch (err) { M.enviando = false; aviso('Error en el envío: ' + err.message, 'error'); }
     pintarLotes();
+  });
+  $('#buscar-reenvio').addEventListener('input', pintarReenvio);
+  $('#resultados-reenvio').addEventListener('click', async (e) => {
+    const b = e.target.closest('.btn-reenviar'); if (!b) return;
+    const correo = $(`.correo-reenvio[data-k="${b.dataset.k}"]`).value;
+    b.disabled = true;
+    try { await reenviar(b.dataset.l, b.dataset.n, correo); } catch (err) { M.enviando = false; aviso('No se pudo reenviar: ' + err.message, 'error'); }
+    b.disabled = false;
   });
   window.addEventListener('beforeunload', (e) => { if (M.enviando) { e.preventDefault(); e.returnValue = ''; } });
   try { await completarInicio(); } catch (e) { aviso(e.message, 'error'); }
-  if (M.token) { try { M.yo = await graph('GET', '/me?$select=displayName,mail,userPrincipalName'); } catch (e) { M.token = null; sessionStorage.removeItem('cd_token'); aviso('La sesión venció. Vuelve a iniciar sesión.', 'warn'); } }
+  if (M.token) { try { M.yo = await graph('GET', '/me?$select=displayName,mail,userPrincipalName'); } catch (e) { M.token = null; sessionStorage.removeItem('cd_token'); aviso('La sesión venció. Vuelve a entrar.', 'warn'); } }
   pintarSesion();
 }
 window.addEventListener('DOMContentLoaded', iniciarM365);
+</script>
+<script>/* Asistente de 4 pasos: navegación, revisión de cobertura y ayudas para la operadora. */
+const U = { paso: 1, max: 1, local: false };
+const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const PLATAFORMAS = [['Niubiz', 'Niubiz'], ['AFRUS', 'AFRUS'], ['MC Procesos', 'MC / Izipay']];
+
+function enSesion() { return typeof M !== 'undefined' && !!M.token; }
+
+function irA(n) {
+  U.paso = n; U.max = Math.max(U.max, n);
+  for (let k = 1; k <= 4; k++) $('#paso' + k).hidden = k !== n;
+  uxActualizar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function pasoPermitido(k) {
+  if (k <= U.max) return true;
+  if (k === 4 && enSesion() && M.lotes && M.lotes.length) return true;
+  return false;
+}
+
+/* Cobertura: qué meses tienen pagos exitosos por plataforma. */
+function cobertura() {
+  const P = params();
+  const anio = P.desde ? P.desde.y : new Date().getFullYear();
+  const hoy = new Date();
+  const mesHoy = hoy.getFullYear() > anio ? 12 : hoy.getFullYear() < anio ? 0 : hoy.getMonth() + 1;
+  const filas = []; const faltan = [];
+  for (const [clave, nombre] of PLATAFORMAS) {
+    const n = Array(13).fill(0);
+    for (const p of S.pagos.values()) if (p.ok && p.plataforma === clave && p.f && p.f.y === anio) n[p.f.m]++;
+    const primero = n.findIndex((x, i) => i > 0 && x > 0);
+    const celdas = [];
+    const huecos = [];
+    for (let m = 1; m <= 12; m++) {
+      if (n[m]) celdas.push(`<span class="mes ok" title="${n[m]} pagos">✓</span>`);
+      else if (m > mesHoy) celdas.push('<span class="mes futuro">·</span>');
+      else if (primero < 0 || m < primero) celdas.push('<span class="mes futuro" title="Sin pagos">–</span>');
+      else { celdas.push('<span class="mes falta" title="Sin pagos este mes">!</span>'); huecos.push(MESES_CORTOS[m - 1]); }
+    }
+    if (primero < 0) faltan.push(`${nombre}: no hay ningún reporte`);
+    else if (huecos.length) faltan.push(`${nombre}: ${huecos.join(', ')}`);
+    filas.push(`<tr><td>${nombre}</td>${celdas.map((c) => `<td>${c}</td>`).join('')}</tr>`);
+  }
+  return { anio, faltan, html: `<div class="tabla-scroll" style="margin-bottom:6px"><table class="cob"><thead><tr><th>Pagos ${anio}</th>${MESES_CORTOS.map((m) => `<th>${m}</th>`).join('')}</tr></thead><tbody>${filas.join('')}</tbody></table></div>
+    <p class="small muted" style="margin:0 0 14px"><span class="mes ok" style="width:20px;height:20px;line-height:20px">✓</span> hay pagos · <span class="mes falta" style="width:20px;height:20px;line-height:20px">!</span> no hay pagos ese mes · <span class="mes futuro">·</span> todavía no llega</p>` };
+}
+
+function pintarEstado1() {
+  const hayPagos = [...S.pagos.values()].some((p) => p.ok);
+  if (!hayPagos) {
+    $('#cobertura').innerHTML = '';
+    $('#estado-general').innerHTML = $('#cargando').hidden ? `<li><span class="ico warn">!</span><div><b>Todavía no hay reportes de pago.</b><div class="det">${enSesion() ? 'Guarda los reportes de Niubiz, AFRUS y MC/Izipay en la carpeta <b>01_REPORTES</b> y pulsa <b>Leer la carpeta otra vez</b>.' : 'Arrástralos en <b>Agregar un archivo</b>.'}</div></div></li>` : '';
+    $('#motivo-1').textContent = $('#cargando').hidden ? 'Faltan los reportes de pago.' : '';
+    return;
+  }
+  const c = cobertura();
+  $('#cobertura').innerHTML = c.html;
+  const it = [];
+  const exitosos = [...S.pagos.values()].filter((p) => p.ok && p.f && p.f.y === c.anio).length;
+  it.push(c.faltan.length
+    ? ['warn', 'Revisa si faltan reportes', `Meses sin pagos — ${c.faltan.map(esc).join(' · ')}. Si falta un reporte, descárgalo de la plataforma, guárdalo en <b>01_REPORTES</b> y pulsa <b>Leer la carpeta otra vez</b>. Si de verdad no hubo pagos ese mes, puedes continuar.`]
+    : ['ok', `Reportes completos: ${exitosos.toLocaleString('es-PE')} pagos exitosos en ${c.anio}`, 'Ya se quitaron los pagos rechazados, fallidos, reembolsados y repetidos.']);
+  it.push(S.base.size
+    ? ['ok', `Base de correos: ${S.base.size.toLocaleString('es-PE')} personas`, 'De aquí salen los correos y nombres de los donantes.']
+    : ['warn', 'No se encontró la base de correos', 'Debe estar en <b>02_BASE_DONANTES</b>. Sin ella, muchas personas quedarán sin correo.']);
+  it.push(S.plantillas.personas
+    ? ['ok', 'Plantilla oficial lista', 'El certificado se arma sobre el formato oficial de Crea+.']
+    : ['mal', 'Falta la plantilla del certificado', 'Debe estar en <b>05_HERRAMIENTA</b> con el nombre <b>plantilla_personas.pdf</b>.']);
+  if (S.emitidos.size) it.push(['info', `${S.emitidos.size.toLocaleString('es-PE')} personas ya tienen su certificado de este año`, 'No se les volverá a crear.']);
+  const raros = S.archivos.filter((a) => a.tipo === 'DESCONOCIDO');
+  if (raros.length) it.push(['mal', `${raros.length} archivo(s) no se reconocieron y no se usan`, raros.map((a) => esc(a.nombre)).join(', ')]);
+  if (enSesion() && M.lotes) {
+    const pend = M.lotes.reduce((s, l) => s + pendientesDe(l).pend.length, 0);
+    if (pend) it.push(['warn', `Hay ${pend.toLocaleString('es-PE')} certificados ya creados que faltan enviar`, '<button class="sec" data-ir="4" style="margin-top:6px">Ir a enviarlos</button>']);
+  }
+  const ico = { ok: '✓', warn: '!', mal: '✕', info: 'i' };
+  $('#estado-general').innerHTML = it.map(([t, tit, det]) => `<li><span class="ico ${t}">${ico[t]}</span><div><b>${tit}</b><div class="det">${det}</div></div></li>`).join('');
+  $('#motivo-1').textContent = '';
+}
+
+function uxActualizar() {
+  for (const b of document.querySelectorAll('.pbtn')) {
+    const k = +b.dataset.p;
+    b.classList.toggle('actual', k === U.paso);
+    b.classList.toggle('hecho', k !== U.paso && pasoPermitido(k));
+    b.querySelector('.n').textContent = k !== U.paso && k < U.max ? '✓' : k;
+  }
+  const listos = S.donantes.filter((d) => d.incluir && d.estado === 'LISTO').length;
+  const muestras = S.muestrasVistas.size;
+  const ok2 = listos > 0 && muestras >= 3;
+  $('#btn-a-paso3').disabled = !ok2;
+  $('#motivo-2').textContent = !listos ? 'No hay donantes listos.' : muestras < 3 ? `Mira ${3 - muestras} ejemplo(s) más.` : '';
+  $('#btn-muestra').textContent = muestras ? 'Ver otro ejemplo' : 'Ver un ejemplo';
+  const creado = !$('#post-crear').hidden;
+  $('#btn-a-paso4').hidden = !creado;
+  $('#form-crear').hidden = creado;
+  if (creado) { $('#btn-generar-sp').hidden = true; $('#motivo-3').textContent = ''; }
+  else if (enSesion()) $('#btn-generar-sp').hidden = false;
+}
+
+function uxSesion(dentro) {
+  const ti = /ti\b/.test(location.hash);
+  $('#config-ti').hidden = !ti;
+  $('#link-local').hidden = !ti;
+  const activo = dentro || U.local;
+  $('#bienvenida').hidden = activo;
+  $('#pasos').hidden = !activo;
+  if (!activo) { for (let k = 1; k <= 4; k++) $('#paso' + k).hidden = true; return; }
+  $('#det-zona').open = !dentro;
+  irA(U.paso);
+  if (dentro && !M.leido && !M.leyendo) actualizarDesdeSharePoint();
+}
+
+function uxIniciar() {
+  const _pintarArchivos = pintarArchivos;
+  pintarArchivos = function () { _pintarArchivos(); pintarEstado1(); };
+  const _pintarLotes = pintarLotes;
+  pintarLotes = function () { _pintarLotes(); if (U.paso === 1) pintarEstado1(); uxActualizar(); };
+  $('#pasos').addEventListener('click', (e) => { const b = e.target.closest('.pbtn'); if (b && pasoPermitido(+b.dataset.p)) irA(+b.dataset.p); });
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-ir]'); if (b) irA(+b.dataset.ir); });
+  $('#btn-a-paso3').addEventListener('click', () => { $('#post-crear').hidden = true; actualizarPaso3(); irA(3); });
+  $('#btn-a-paso4').addEventListener('click', () => irA(4));
+  $('#btn-muestra').addEventListener('click', () => {
+    const listos = S.donantes.map((d, i) => [d, i]).filter(([d]) => d.incluir && d.estado === 'LISTO');
+    const nuevos = listos.filter(([d]) => !S.muestrasVistas.has(d.doc));
+    const pool = nuevos.length ? nuevos : listos;
+    if (!pool.length) { aviso('No hay donantes listos para mostrar.', 'warn'); return; }
+    // Preferir ejemplos variados: el que tiene más líneas, uno con varias plataformas y uno al azar.
+    const orden = [(a, b) => b[0].lineas.length - a[0].lineas.length, (a, b) => b[0].plataformas.length - a[0].plataformas.length, () => Math.random() - 0.5];
+    const pick = [...pool].sort(orden[Math.min(S.muestrasVistas.size, 2)])[0];
+    verMuestra(pick[1]);
+  });
+  $('#btn-modo-local').addEventListener('click', () => { U.local = true; uxSesion(false); });
+  window.addEventListener('hashchange', () => uxSesion(enSesion()));
+  if (typeof M === 'undefined') uxSesion(false);
+}
+window.addEventListener('DOMContentLoaded', uxIniciar);
 </script>
 </body>
 </html>
