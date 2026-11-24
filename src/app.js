@@ -528,7 +528,7 @@ function pintarRevision() {
       <td class="num">${d.pagos.length}</td><td class="num">${soles(d.total)}</td>
       <td class="small" style="white-space:nowrap">${d.lineas.map((l) => `${l.cantidad} × ${soles(l.valor)}`).join('<br>')}<br><span class="muted">${esc(d.plataformas)}</span></td>
       <td class="small">${d.tipo === 'empresas' ? `<input data-i="${i}" class="ed-dir" value="${esc(d.direccion)}" placeholder="Dirección de la empresa"><br>` : ''}${d.obs.map(esc).join('<br>')}${d.nota ? `<br><span class="muted">${esc(d.nota)}</span>` : ''}</td>
-      <td><button class="sec ver" data-i="${i}" style="padding:5px 10px">Ver PDF</button></td></tr>`;
+      <td><button class="sec ver" data-i="${i}" style="padding:5px 12px;white-space:nowrap">Ver PDF</button></td></tr>`;
   }).join('') || '<tr><td colspan="10" class="muted">No hay registros con este filtro.</td></tr>';
   $('#paginas').innerHTML = pags > 1 ? Array.from({ length: pags }, (_, k) => `<button class="pag ${k === S.pagina ? 'act' : ''}" data-p="${k}">${k + 1}</button>`).join('') : '';
   $('#sin-doc').innerHTML = S.sinDoc.length ? `<details><summary>${S.sinDoc.length} pagos exitosos no tienen DNI y no se pudieron asignar a nadie (no se incluyen)</summary>
