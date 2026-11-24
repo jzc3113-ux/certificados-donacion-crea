@@ -572,7 +572,11 @@ async function verMuestra(i) {
   try {
     const bytes = await pdfCertificado(d, SERIE + 'MUESTRA', params(), await plantillaDe(d.tipo));
     const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
-    $('#visor').src = url; $('#modal').hidden = false;
+    const sinVisor = navigator.pdfViewerEnabled === false;
+    $('#visor').hidden = sinVisor; $('#visor-alt').hidden = !sinVisor;
+    if (!sinVisor) $('#visor').src = url;
+    const dl = $('#descargar-muestra'); dl.href = url; dl.download = `MUESTRA - ${d.nombre || d.doc}.pdf`;
+    $('#modal').hidden = false;
     S.muestrasVistas.add(d.doc); actualizarPaso3();
   } catch (e) { aviso('No se pudo crear la muestra: ' + e.message, 'error'); }
 }
