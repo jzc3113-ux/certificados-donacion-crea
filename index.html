@@ -160,7 +160,7 @@ footer { text-align:center; color:var(--gris); font-size:12px; padding:20px; }
   <p id="enlace-carpeta"></p></details></section>
 <footer>Crea+ · Certificados de donación · uso interno · contiene pdf-lib (MIT) y JSZip (MIT)</footer>
 <div id="avisos"></div>
-<div id="modal" hidden><div class="modal-caja"><header style="background:var(--azul);color:#fff;display:flex;justify-content:space-between;align-items:center"><b>Certificado de muestra</b><button class="sec" id="cerrar-modal" style="background:#fff">Cerrar</button></header><iframe id="visor" title="Vista previa del certificado"></iframe></div></div>
+<div id="modal" hidden><div class="modal-caja"><header style="background:var(--azul);color:#fff;display:flex;justify-content:space-between;align-items:center"><b>Certificado de muestra</b><span><a class="sec" id="descargar-muestra" style="background:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;margin-right:8px">Descargar PDF</a><button class="sec" id="cerrar-modal" style="background:#fff">Cerrar</button></span></header><iframe id="visor" title="Vista previa del certificado"></iframe><div id="visor-alt" hidden style="padding:32px;text-align:center"><p>Este navegador no puede mostrar el PDF dentro de la página.</p><p>Pulsa <b>Descargar PDF</b> (arriba) y ábrelo para revisarlo. En una computadora con Edge o Chrome se ve aquí mismo.</p></div></div></div>
 <script>!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t=t||self).PDFLib={})}(this,(function(t){"use strict";
 /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -766,7 +766,11 @@ async function verMuestra(i) {
   try {
     const bytes = await pdfCertificado(d, SERIE + 'MUESTRA', params(), await plantillaDe(d.tipo));
     const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
-    $('#visor').src = url; $('#modal').hidden = false;
+    const sinVisor = navigator.pdfViewerEnabled === false;
+    $('#visor').hidden = sinVisor; $('#visor-alt').hidden = !sinVisor;
+    if (!sinVisor) $('#visor').src = url;
+    const dl = $('#descargar-muestra'); dl.href = url; dl.download = `MUESTRA - ${d.nombre || d.doc}.pdf`;
+    $('#modal').hidden = false;
     S.muestrasVistas.add(d.doc); actualizarPaso3();
   } catch (e) { aviso('No se pudo crear la muestra: ' + e.message, 'error'); }
 }
