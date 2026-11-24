@@ -18,5 +18,7 @@ cfg = json.load(open(cfg_path)) if os.path.exists(cfg_path) else {}
 html = html.replace('/*__CFG__*/{}', json.dumps(cfg))
 xlsx = base64.b64encode(open(os.path.join(B, 'src/registro_plantilla.xlsx'), 'rb').read()).decode()
 html = html.replace("'/*__REGISTRO_B64__*/'", "'" + xlsx + "'")
+for marca_img, ruta in {'__IMG_LOGO_BLANCO__': 'src/marca/logo_blanco.png', '__IMG_CREATIN__': 'src/marca/creatin_globo.png'}.items():
+    html = html.replace(marca_img, 'data:image/png;base64,' + base64.b64encode(open(os.path.join(B, ruta), 'rb').read()).decode())
 open(os.path.join(B, 'index.html'), 'w', encoding='utf-8').write(html)
 print('index.html generado,', len(html), 'caracteres')

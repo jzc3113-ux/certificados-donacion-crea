@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Certificados de donación · Crea+</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
 :root { --azul:#1a1ab8; --azul-osc:#12127f; --azul2:#eef0ff; --verde:#0f7b3f; --verde2:#e7f6ec; --ambar:#8a5200; --ambar2:#fff4df; --rojo:#b42318; --rojo2:#fdecea; --gris:#5f6470; --gris2:#f1f2f7; --borde:#e1e4ec; --texto:#1d2030; }
 * { box-sizing:border-box; }
@@ -107,21 +109,74 @@ progress { width:100%; height:14px; accent-color:var(--azul); }
 #bienvenida h2 { font-size:26px; margin:0 0 8px; }
 .pie-ayuda { text-align:center; color:var(--gris); font-size:13.5px; padding:10px 20px 28px; }
 @media (max-width:760px) { nav#pasos small { display:none; } .etapas { grid-template-columns:1fr; } .paso { padding:20px 16px; } }
+/* ---------- identidad Crea+ ---------- */
+:root { --azul:#0C00C0; --azul-osc:#08008a; --azul2:#ECEBFF; --lavanda:#6D66D9; --amarillo:#FFE667; --amarillo2:#FFF0A4; --rosa:#FFC1EB; --verde-p:#CBEBAB; --negro:#1D1D1B;
+  --verde:#2f6b12; --verde2:#E8F6D9; --ambar:#7a5a00; --ambar2:#FFF6CC; --rojo:#a3155f; --rojo2:#FFE3F5; --texto:#1D1D1B; --borde:#e4e3f3; --gris2:#F3F2FB; }
+body { background:#FAFAFE; }
+.display { font-family:'Bebas Neue','Arial Narrow',Impact,sans-serif; font-weight:400; letter-spacing:.5px; text-transform:uppercase; }
+header.barra { background:var(--azul); padding:16px 32px; }
+.marca img { height:34px; display:block; }
+.marca .sep { width:1px; height:34px; background:rgba(255,255,255,.35); }
+.marca h1 { font-family:'Bebas Neue','Arial Narrow',Impact,sans-serif; font-weight:400; font-size:26px; letter-spacing:.6px; line-height:1; }
+.marca p { font-size:12.5px; opacity:.85; margin-top:3px; }
+#sesion button { border-radius:999px; background:#fff; color:var(--azul); }
+.franja { height:22px; overflow:hidden; margin-bottom:6px; }
+.franja svg { display:block; }
+.paso h2 { font-family:'Bebas Neue','Arial Narrow',Impact,sans-serif; font-weight:400; font-size:40px; letter-spacing:.6px; color:var(--azul); line-height:1.05; text-transform:uppercase; margin-bottom:6px; }
+.paso, .tarjeta { border-radius:22px; border-color:var(--borde); box-shadow:0 1px 0 rgba(12,0,192,.04); }
+button, a.sec, button.sec { border-radius:999px; }
+button.grande { padding:14px 30px; }
+.pbtn { border-radius:16px; }
+.pbtn.actual { border-color:var(--azul); background:#fff; }
+.pbtn.actual .n { background:var(--azul); }
+.pbtn.hecho .n { background:var(--verde-p); color:var(--verde); }
+.metrica { border-radius:16px; }
+.metrica.ok { background:var(--verde2); } .metrica.warn { background:var(--ambar2); }
+.metrica.sel { background:#fff; border-color:var(--azul); }
+.metrica b { font-family:'Bebas Neue','Arial Narrow',Impact,sans-serif; font-weight:400; font-size:40px; letter-spacing:.5px; }
+.metrica.ok b { color:var(--verde); } .metrica.warn b { color:var(--ambar); }
+.grande-num b, .resaltado { background:var(--amarillo); color:var(--azul); padding:0 8px; border-radius:6px; }
+.caja { border-radius:16px; } .caja.ok { background:var(--verde2); } .caja.warn { background:var(--ambar2); } .caja.mal { background:var(--rojo2); } .caja.info { background:var(--azul2); }
+.ico.ok { background:var(--verde-p); color:var(--verde); } .ico.warn { background:var(--amarillo); color:var(--negro); } .ico.mal { background:var(--rosa); color:var(--rojo); } .ico.info { background:var(--azul2); color:var(--azul); }
+.mes.ok { background:var(--verde-p); color:var(--verde); } .mes.falta { background:var(--amarillo); color:var(--negro); }
+.estado.LISTO { background:var(--verde-p); color:var(--verde); } .estado.REVISAR { background:var(--amarillo); color:var(--negro); } .estado.EMITIDO { background:var(--azul2); color:var(--lavanda); }
+tr.revisar td { background:#FFFBEA; }
+.punto.ok { background:var(--verde-p); color:var(--verde); }
+.check { background:var(--azul2); border-radius:14px; }
+.etapa { border-radius:16px; } .etapa.hecha { background:var(--verde2); border-color:var(--verde-p); }
+.lote { border-radius:18px; }
+th { background:var(--gris2); }
+details.mas { border-radius:14px; }
+#bienvenida { display:grid; grid-template-columns:1.25fr .75fr; gap:24px; align-items:center; text-align:left; padding:44px 48px; overflow:hidden; position:relative; }
+#bienvenida h2 { font-size:56px; line-height:.95; margin:0 0 14px; }
+#bienvenida h2 .resaltado { display:inline-block; padding:2px 12px 0; margin-top:6px; }
+#bienvenida .sub { font-size:17px; }
+#bienvenida img.ilus { width:100%; max-width:240px; justify-self:center; }
+.aviso { border-radius:12px; }
+.aviso.ok { border-color:#7fc24a; } .aviso.warn { border-color:#e6b800; } .aviso.error { border-color:var(--rojo); }
+.modal-caja header { background:var(--azul); }
+.exito { display:flex; gap:18px; align-items:center; }
+.exito img { width:110px; flex:none; }
+@media (max-width:760px) { #bienvenida { grid-template-columns:1fr; padding:28px 22px; } #bienvenida img.ilus { max-width:160px; } .paso h2 { font-size:32px; } }
 </style>
 </head>
 <body>
 <header class="barra">
-  <div class="marca"><div class="logo">C+</div><div><h1>Certificados de donación</h1><p>Crea+ · Amigos Crea+ 2026</p></div></div>
+  <div class="marca"><img src="__IMG_LOGO_BLANCO__" alt="Crea+"><span class="sep"></span><div><h1>Certificados de donación</h1><p>Amigos Crea+ 2026</p></div></div>
   <div id="sesion"></div>
 </header>
+<div class="franja" aria-hidden="true"><svg width="100%" height="22" preserveAspectRatio="xMinYMid slice" viewBox="0 0 900 22"><path d="M11 0 A11 11 0 0 0 11 22 Z" fill="#CBEBAB"/><circle cx="22" cy="11" r="11" fill="#FFF0A4"/><path d="M33 0 A11 11 0 0 1 33 22 Z" fill="#FFC1EB"/><path d="M55 0 A11 11 0 0 0 55 22 Z" fill="#CBEBAB"/><path d="M66 0 A11 11 0 0 0 66 22 Z" fill="#6D66D9"/><circle cx="77" cy="11" r="11" fill="#FFC1EB"/><path d="M99 0 A11 11 0 0 0 99 22 Z" fill="#CBEBAB"/><path d="M110 0 A11 11 0 0 0 110 22 Z" fill="#6D66D9"/><circle cx="121" cy="11" r="11" fill="#FFF0A4"/><path d="M132 0 A11 11 0 0 1 132 22 Z" fill="#FFC1EB"/><path d="M154 0 A11 11 0 0 0 154 22 Z" fill="#CBEBAB"/><path d="M165 0 A11 11 0 0 0 165 22 Z" fill="#6D66D9"/><circle cx="176" cy="11" r="11" fill="#FFC1EB"/><path d="M198 0 A11 11 0 0 0 198 22 Z" fill="#CBEBAB"/><path d="M209 0 A11 11 0 0 0 209 22 Z" fill="#CBEBAB"/><circle cx="220" cy="11" r="11" fill="#FFF0A4"/><path d="M231 0 A11 11 0 0 1 231 22 Z" fill="#FFC1EB"/><path d="M253 0 A11 11 0 0 0 253 22 Z" fill="#CBEBAB"/><path d="M264 0 A11 11 0 0 0 264 22 Z" fill="#6D66D9"/><circle cx="275" cy="11" r="11" fill="#FFC1EB"/><path d="M297 0 A11 11 0 0 0 297 22 Z" fill="#CBEBAB"/><path d="M308 0 A11 11 0 0 0 308 22 Z" fill="#6D66D9"/><circle cx="319" cy="11" r="11" fill="#FFF0A4"/><path d="M330 0 A11 11 0 0 1 330 22 Z" fill="#FFC1EB"/><path d="M352 0 A11 11 0 0 0 352 22 Z" fill="#CBEBAB"/><path d="M363 0 A11 11 0 0 0 363 22 Z" fill="#6D66D9"/><circle cx="374" cy="11" r="11" fill="#FFC1EB"/><path d="M396 0 A11 11 0 0 0 396 22 Z" fill="#CBEBAB"/><path d="M407 0 A11 11 0 0 0 407 22 Z" fill="#CBEBAB"/><circle cx="418" cy="11" r="11" fill="#FFF0A4"/><path d="M429 0 A11 11 0 0 1 429 22 Z" fill="#FFC1EB"/><path d="M451 0 A11 11 0 0 0 451 22 Z" fill="#CBEBAB"/><path d="M462 0 A11 11 0 0 0 462 22 Z" fill="#6D66D9"/><circle cx="473" cy="11" r="11" fill="#FFC1EB"/><path d="M495 0 A11 11 0 0 0 495 22 Z" fill="#CBEBAB"/><path d="M506 0 A11 11 0 0 0 506 22 Z" fill="#6D66D9"/><circle cx="517" cy="11" r="11" fill="#FFF0A4"/><path d="M528 0 A11 11 0 0 1 528 22 Z" fill="#FFC1EB"/><path d="M550 0 A11 11 0 0 0 550 22 Z" fill="#CBEBAB"/><path d="M561 0 A11 11 0 0 0 561 22 Z" fill="#6D66D9"/><circle cx="572" cy="11" r="11" fill="#FFC1EB"/><path d="M594 0 A11 11 0 0 0 594 22 Z" fill="#CBEBAB"/><path d="M605 0 A11 11 0 0 0 605 22 Z" fill="#CBEBAB"/><circle cx="616" cy="11" r="11" fill="#FFF0A4"/><path d="M627 0 A11 11 0 0 1 627 22 Z" fill="#FFC1EB"/><path d="M649 0 A11 11 0 0 0 649 22 Z" fill="#CBEBAB"/><path d="M660 0 A11 11 0 0 0 660 22 Z" fill="#6D66D9"/><circle cx="671" cy="11" r="11" fill="#FFC1EB"/><path d="M693 0 A11 11 0 0 0 693 22 Z" fill="#CBEBAB"/><path d="M704 0 A11 11 0 0 0 704 22 Z" fill="#6D66D9"/><circle cx="715" cy="11" r="11" fill="#FFF0A4"/><path d="M726 0 A11 11 0 0 1 726 22 Z" fill="#FFC1EB"/><path d="M748 0 A11 11 0 0 0 748 22 Z" fill="#CBEBAB"/><path d="M759 0 A11 11 0 0 0 759 22 Z" fill="#6D66D9"/><circle cx="770" cy="11" r="11" fill="#FFC1EB"/><path d="M792 0 A11 11 0 0 0 792 22 Z" fill="#CBEBAB"/><path d="M803 0 A11 11 0 0 0 803 22 Z" fill="#CBEBAB"/><circle cx="814" cy="11" r="11" fill="#FFF0A4"/><path d="M825 0 A11 11 0 0 1 825 22 Z" fill="#FFC1EB"/><path d="M847 0 A11 11 0 0 0 847 22 Z" fill="#CBEBAB"/><path d="M858 0 A11 11 0 0 0 858 22 Z" fill="#6D66D9"/><circle cx="869" cy="11" r="11" fill="#FFC1EB"/><path d="M891 0 A11 11 0 0 0 891 22 Z" fill="#CBEBAB"/><path d="M902 0 A11 11 0 0 0 902 22 Z" fill="#6D66D9"/></svg></div>
 <main>
 
 <section class="paso" id="bienvenida" hidden>
-  <h2>Hola 👋</h2>
-  <p class="sub">Con esta herramienta preparas y envías los certificados de donación del año.<br>Para empezar, entra con tu cuenta de Crea+.</p>
-  <button class="grande" id="btn-entrar-grande">Entrar con mi cuenta de Crea+</button>
-  <p class="small muted" style="margin-top:22px">Usa tu correo @creamas.org. No necesitas instalar nada.</p>
-  <p id="link-local" hidden><button class="link" id="btn-modo-local">Trabajar sin conexión (solo TI)</button></p>
+  <div>
+    <h2>Certificados que<br><span class="resaltado">agradecen</span></h2>
+    <p class="sub">Con esta herramienta preparas y envías los certificados de donación del año a cada Amigo Crea+. Son 4 pasos y la app te guía en cada uno.</p>
+    <button class="grande" id="btn-entrar-grande">Entrar con mi cuenta de Crea+</button>
+    <p class="small muted" style="margin-top:18px">Usa tu correo @creamas.org. No necesitas instalar nada.</p>
+    <p id="link-local" hidden><button class="link" id="btn-modo-local">Trabajar sin conexión (solo TI)</button></p>
+  </div>
+  <img class="ilus" src="__IMG_CREATIN__" alt="">
 </section>
 
 <nav id="pasos" hidden>
